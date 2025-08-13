@@ -89,6 +89,26 @@
     .swipe-overlay.show{display:block}
     @media(min-width:768px){.swipe-overlay{display:none}}
 
+    /* Arrow nav (visible on all sizes; sits above swipe overlay) */
+    .nav-arrow{
+      position:absolute; top:64px; bottom:0; width:56px;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(to var(--side, right), rgba(17,18,20,.0), rgba(17,18,20,.35));
+      border:none; color:#fff; cursor:pointer; outline:none;
+      z-index:220; /* above overlay (200) and edges (120) */
+      transition:opacity .15s ease;
+    }
+    .nav-arrow:hover{background:linear-gradient(to var(--side, right), rgba(17,18,20,.0), rgba(17,18,20,.45))}
+    .nav-arrow.left{left:0; --side:right}
+    .nav-arrow.right{right:0; --side:left}
+    .nav-arrow .chev{
+      width:26px; height:26px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    }
+    @media (hover:none){
+      .nav-arrow{background:transparent}
+    }
+
     /* Bottom rail (mobile) */
     .bottomrail{border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);position:relative;z-index:60}
     @media(min-width:768px){.bottomrail{display:none}}
@@ -158,6 +178,18 @@
       <div class="swipe-edge left" id="edgeL" aria-hidden="true"></div>
       <div class="swipe-edge right" id="edgeR" aria-hidden="true"></div>
 
+      <!-- Arrow navigation -->
+      <button class="nav-arrow left" id="navPrev" aria-label="Previous profile" title="Previous (←)">
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button class="nav-arrow right" id="navNext" aria-label="Next profile" title="Next (→)">
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
       <!-- Bottom thumbnails (mobile) -->
       <div class="bottomrail">
         <div id="thumbsHorizontal" class="thumbs-horizontal no-scrollbar"></div>
@@ -176,6 +208,11 @@
     // —— State helpers ——
     const qs = new URL(location.href);
     let activeId = qs.searchParams.get('id') || ANIMALS[0].id;
+
+    // Navigation helpers (for arrows, keys, swipes)
+    const order = () => ANIMALS.map(a=>a.id);
+    function goPrev(){ const o=order(); const i=o.indexOf(activeId); setActive(o[(i-1+o.length)%o.length]); }
+    function goNext(){ const o=order(); const i=o.indexOf(activeId); setActive(o[(i+1)%o.length]); }
 
     function setActive(id){
       activeId = id;
@@ -284,10 +321,8 @@
     // —— Keyboard navigation ——
     function attachKeys(){
       window.addEventListener('keydown',(e)=>{
-        const order = ANIMALS.map(a=>a.id);
-        const i = order.indexOf(activeId);
-        if(['ArrowLeft','ArrowUp','a','w'].includes(e.key)) setActive(order[(i-1+order.length)%order.length]);
-        if(['ArrowRight','ArrowDown','d','s'].includes(e.key)) setActive(order[(i+1)%order.length]);
+        if(['ArrowLeft','ArrowUp','a','w'].includes(e.key)) goPrev();
+        if(['ArrowRight','ArrowDown','d','s'].includes(e.key)) goNext();
       });
     }
 
@@ -297,10 +332,6 @@
       const edgeL = document.getElementById('edgeL');
       const edgeR = document.getElementById('edgeR');
 
-      const order = () => ANIMALS.map(a=>a.id);
-      const prev = () => { const o=order(); const i=o.indexOf(activeId); setActive(o[(i-1+o.length)%o.length]); };
-      const next = () => { const o=order(); const i=o.indexOf(activeId); setActive(o[(i+1)%o.length]); };
-
       // Helper to bind both touch and pointer events
       const bindSwipe = (el) => {
         let down = null;
@@ -308,10 +339,10 @@
         const onUp = (x,y)=>{
           if(!down) return; const dx=x-down.x, dy=y-down.y; down=null;
           const absX=Math.abs(dx), absY=Math.abs(dy);
-          if(absX>50 && absX>absY*1.3){ dx<0 ? next() : prev(); return; }
+          if(absX>50 && absX>absY*1.3){ dx<0 ? goNext() : goPrev(); return; }
           // Fallback: taps on left/right halves also navigate
           const w = el.getBoundingClientRect().width;
-          if(w>0){ (x < w/2) ? prev() : next(); }
+          if(w>0){ (x < w/2) ? goPrev() : goNext(); }
         };
 
         // Pointer events (cover Chrome/Android, Safari iOS 13+)
@@ -327,6 +358,10 @@
       };
 
       [overlay, edgeL, edgeR].forEach(bindSwipe);
+
+      // Edge click handlers for navigation (desktop)
+      if (edgeL) edgeL.addEventListener('click', goPrev);
+      if (edgeR) edgeR.addEventListener('click', goNext);
     }
 
     // Init
@@ -335,6 +370,20 @@
     attachSearch('searchM','searchListM');
     attachKeys();
     attachSwipe();
+    // Arrow buttons
+    const navPrev = document.getElementById('navPrev');
+    const navNext = document.getElementById('navNext');
+    if (navPrev && navNext){
+      ['click','pointerup','touchend'].forEach(evt=>{
+        navPrev.addEventListener(evt, (e)=>{ if(evt==='click' || (e.pointerType && e.pointerType!=='mouse') ) goPrev(); }, {passive:true});
+        navNext.addEventListener(evt, (e)=>{ if(evt==='click' || (e.pointerType && e.pointerType!=='mouse') ) goNext(); }, {passive:true});
+      });
+      // Keyboard accessibility when focused
+      [navPrev, navNext].forEach(btn=>{
+        btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn===navPrev?goPrev():goNext(); }});
+      });
+    }
+
     render();
   </script>
 </body>
