@@ -7,13 +7,14 @@
   <style>
     /* —— Theme —— */
     :root{
-      --bg:#0a0a0b;           /* page bg */
-      --border:#ffffff1a;     /* subtle borders */
-      --text:#f4f4f5;         /* primary text */
-      --muted:#a1a1aa;        /* secondary text */
-      --accent:#10b981;       /* emerald */
-      --accent-2:#14b8a6;     /* teal */
+      --bg:#0a0a0b;
+      --border:#ffffff1a;
+      --text:#f4f4f5;
+      --muted:#a1a1aa;
+      --accent:#10b981;
+      --accent-2:#14b8a6;
       --shadow:0 10px 30px rgba(0,0,0,.45);
+      --railH:72px; /* mobile bottom rail height */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -47,12 +48,12 @@
     .search-item:hover{background:rgba(255,255,255,.05)}
     .search-item small{display:block;color:var(--muted)}
 
-    /* Thumbnail lists */
+    /* Thumbnails */
     .thumbs-vertical{flex:1;overflow:auto;padding:0 12px 12px}
-    .thumbs-horizontal{display:flex;gap:8px;overflow:auto;padding:8px 8px}
+    .thumbs-horizontal{display:flex;gap:8px;overflow:auto;padding:8px}
 
     .thumb{display:flex;align-items:center;gap:10px;border:1px solid var(--border);background:#0f1012b3;border-radius:16px;padding:8px;transition:.18s ease;position:relative}
-    /* Normalize tiles so every thumbnail item is the same size */
+    /* Uniform tile sizing */
     .thumb{-webkit-appearance:none;appearance:none;margin:0;width:100%;height:80px;overflow:hidden}
     .thumb > div{display:flex;flex-direction:column;justify-content:center;min-width:0}
     .thumb:hover{background:#0f1012cc}
@@ -78,20 +79,22 @@
     .profile-btn svg{width:22px;height:22px}
     @media(max-width:359px){.profile-btn{width:32px;height:32px}.profile-btn svg{width:18px;height:18px}}
 
-    .viewport{position:absolute;inset:64px 0 0 0}
-    @media(min-width:768px){.viewport{inset:68px 0 0 0}}
+    /* Viewport: reserve space for the mobile rail */
+    .viewport{position:absolute;left:0;right:0;top:64px;bottom:0}
+    @media(min-width:768px){.viewport{top:68px;bottom:0}}
+    @media(max-width:767px){.viewport{bottom:calc(var(--railH) + env(safe-area-inset-bottom,0px))}}
     .viewport iframe,.viewport img{width:100%;height:100%;display:block;position:relative;z-index:10}
     .viewport img{object-fit:contain;background:black}
 
-    /* Bottom arrows (don’t block pinch or pull-to-refresh) */
+    /* Bottom arrows (do not block pinch) */
     .view-actions{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:auto;z-index:20;bottom:8px}
-    @media(max-width:767px){.view-actions{bottom:72px}} /* sit above the mobile thumbnail rail */
+    @media(max-width:767px){.view-actions{bottom:calc(var(--railH) + 8px)}}
 
-    /* Bottom rail (mobile) */
-    .bottomrail{border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);position:relative;z-index:60}
+    /* Bottom rail (mobile) pinned to bottom */
+    .bottomrail{position:absolute;left:0;right:0;bottom:0;height:var(--railH);border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);z-index:60}
     @media(min-width:768px){.bottomrail{display:none}}
 
-    /* Welcome panel (fallback when no image is provided) */
+    /* Welcome fallback panel (when no image) */
     .welcome{position:absolute;inset:0;display:grid;place-items:center;padding:24px}
     .wel-card{max-width:900px;width:min(100%,900px);border:1px solid var(--border);border-radius:24px;background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(20,184,166,.08));padding:28px;box-shadow:var(--shadow)}
     .wel-card h2{margin:0 0 8px;font-size:22px}
@@ -104,7 +107,7 @@
 <body>
   <div class="app">
     <!-- Sidebar (desktop) -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
       <div class="header">
         <div class="brand">
           <div class="logo" aria-hidden="true"></div>
@@ -121,7 +124,7 @@
       <div id="thumbsVertical" class="thumbs-vertical no-scrollbar"></div>
     </aside>
 
-    <!-- Main content -->
+    <!-- Main -->
     <main class="main">
       <!-- Top (mobile) header + search -->
       <div class="topbar mobile">
@@ -149,37 +152,29 @@
         </div>
         <div class="profile-actions">
           <button id="btnPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <button id="btnNext" class="profile-btn" aria-label="Next profile" title="Next (→)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <a id="openExternal" class="openbtn" target="_blank" rel="noreferrer">Open in new tab</a>
         </div>
       </div>
 
-      <!-- Viewport -->
-      <div class="viewport" id="viewport"><!-- dynamic content injected here --></div>
+      <!-- Main viewport -->
+      <div class="viewport" id="viewport"></div>
 
-      <!-- Bottom arrows inside the viewfinder -->
+      <!-- Bottom arrows in viewfinder -->
       <div class="view-actions">
         <button id="viewPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <button id="viewNext" class="profile-btn" aria-label="Next profile" title="Next (→)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
 
-      <!-- Bottom thumbnails (mobile) -->
+      <!-- Bottom thumbnail rail (mobile) -->
       <div class="bottomrail">
         <div id="thumbsHorizontal" class="thumbs-horizontal no-scrollbar"></div>
       </div>
@@ -187,14 +182,14 @@
   </div>
 
   <script>
-    // —— Data ——
+    // Data (ensure filenames/case match your repo)
     const ANIMALS = [
-      { id: 'welcome', name: 'Welcome', species: '', thumb: 'thumbs/welcome_thumb.jpg', profileUrl: 'profiles/welcome_full.png' },
+      { id: 'welcome', name: 'Welcome', species: '', thumb: 'thumbs/welcome_thumb.png', profileUrl: 'profiles/welcome_full.png' },
       { id: 'buckwheat', name: 'Buckwheat', species: 'Male • 4 months', thumb: 'thumbs/buckwheat_thumb.jpg', profileUrl: 'profiles/Buckwheat.png' },
       { id: 'porky', name: 'Porky', species: 'Male • 4 months', thumb: 'thumbs/porky_thumb.jpg', profileUrl: 'profiles/Porky.png' }
     ];
 
-    // —— State helpers ——
+    // State
     const qs = new URL(location.href);
     let activeId = qs.searchParams.get('id') || ANIMALS[0].id;
 
@@ -204,19 +199,13 @@
 
     function setActive(id){
       activeId = id;
-      const u = new URL(location.href);
-      u.searchParams.set('id', id);
-      history.replaceState({}, '', u);
+      const u = new URL(location.href); u.searchParams.set('id', id); history.replaceState({}, '', u);
       render();
-      // highlight active in both rails
-      document.querySelectorAll('.thumb').forEach(el=>{
-        el.classList.toggle('active', el.dataset.id===id);
-      });
+      document.querySelectorAll('.thumb').forEach(el=>el.classList.toggle('active', el.dataset.id===id));
     }
+    const isPdf = url => (url||'').toLowerCase().endsWith('.pdf');
 
-    function isPdf(url){return (url||'').toLowerCase().endsWith('.pdf');}
-
-    // —— Rendering ——
+    // Render
     function render(){
       const active = ANIMALS.find(a=>a.id===activeId) || ANIMALS[0];
       const title = document.getElementById('profileTitle');
@@ -227,9 +216,7 @@
       if(!active || (active.id==='welcome' && !active.profileUrl)){
         title.textContent = 'Welcome';
         meta.textContent = 'How it works';
-        open.href = '#';
-        open.style.pointerEvents='none';
-        open.style.opacity='.6';
+        open.href = '#'; open.style.pointerEvents='none'; open.style.opacity='.6';
         vp.innerHTML = `
           <div class="welcome">
             <div class="wel-card">
@@ -247,18 +234,14 @@
 
       title.textContent = active.name;
       meta.textContent = active.species || '';
-      open.href = active.profileUrl;
-      open.style.pointerEvents='auto';
-      open.style.opacity='1';
+      open.href = active.profileUrl; open.style.pointerEvents='auto'; open.style.opacity='1';
 
-      if(isPdf(active.profileUrl)){
-        vp.innerHTML = `<iframe title="${active.name} profile" src="${active.profileUrl}" loading="lazy"></iframe>`;
-      } else {
-        vp.innerHTML = `<img alt="${active.name} profile" src="${active.profileUrl}" loading="lazy">`;
-      }
+      vp.innerHTML = isPdf(active.profileUrl)
+        ? `<iframe title="${active.name} profile" src="${active.profileUrl}" loading="lazy"></iframe>`
+        : `<img alt="${active.name} profile" src="${active.profileUrl}" loading="lazy">`;
     }
 
-    // —— Build thumbs once ——
+    // Thumbs
     function thumbNode(a){
       const btn = document.createElement('button');
       btn.className = 'thumb';
@@ -273,37 +256,41 @@
         </div>`;
       return btn;
     }
-
     function buildThumbs(){
       const v = document.getElementById('thumbsVertical');
       const h = document.getElementById('thumbsHorizontal');
-      v.innerHTML = ''; h.innerHTML='';
+      if(v) v.innerHTML = '';
+      if(h) h.innerHTML = '';
       ANIMALS.forEach(a=>{
-        const nodeV = thumbNode(a); const nodeH = thumbNode(a);
+        const nodeV = thumbNode(a), nodeH = thumbNode(a);
         if(a.id===activeId){nodeV.classList.add('active');nodeH.classList.add('active');}
-        v.appendChild(nodeV); h.appendChild(nodeH);
+        if(v) v.appendChild(nodeV);
+        if(h) h.appendChild(nodeH);
       });
     }
 
-    // —— Search (desktop + mobile) ——
+    // Search
     function attachSearch(inputId,listId){
       const input = document.getElementById(inputId);
       const list = document.getElementById(listId);
+      if(!input || !list) return;
       input.addEventListener('input',()=>{
         const s = input.value.trim().toLowerCase();
         if(!s){list.classList.add('hidden'); list.innerHTML=''; return;}
         const res = ANIMALS.filter(a=>a.id!=='welcome' && ((a.name||'').toLowerCase().includes(s) || (a.species||'').toLowerCase().includes(s))).slice(0,8);
-        list.innerHTML = res.length? res.map(r=>`<button class="search-item" data-id="${r.id}"><strong>${r.name}</strong><small>${r.species||''}</small></button>`).join('') : `<div class="search-item" disabled>No matches.</div>`;
+        list.innerHTML = res.length
+          ? res.map(r=>`<button class="search-item" data-id="${r.id}"><strong>${r.name}</strong><small>${r.species||''}</small></button>`).join('')
+          : `<div class="search-item" disabled>No matches.</div>`;
         list.classList.remove('hidden');
       });
       list.addEventListener('click',(e)=>{
-        const b = e.target.closest('[data-id]');
-        if(!b) return; setActive(b.dataset.id); list.classList.add('hidden'); input.value='';
+        const b = e.target.closest('[data-id]'); if(!b) return;
+        setActive(b.dataset.id); list.classList.add('hidden'); input.value='';
       });
       document.addEventListener('click',(e)=>{ if(!list.contains(e.target) && e.target!==input) list.classList.add('hidden'); });
     }
 
-    // —— Keyboard navigation ——
+    // Keyboard nav
     function attachKeys(){
       window.addEventListener('keydown',(e)=>{
         if(['ArrowLeft','ArrowUp','a','w'].includes(e.key)) goPrev();
@@ -317,7 +304,7 @@
     attachSearch('searchM','searchListM');
     attachKeys();
 
-    // Wire arrow buttons (top bar + bottom)
+    // Wire top & bottom arrows
     const btnPrev = document.getElementById('btnPrev');
     const btnNext = document.getElementById('btnNext');
     const viewPrev = document.getElementById('viewPrev');
