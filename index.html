@@ -60,6 +60,15 @@
     .thumb .meta{color:var(--muted);font-size:12px}
     .badge{font-size:10px;color:#7bfcc7}
 
+    /* Consistent clickable item sizing for thumbnails (vertical & horizontal) */
+    .thumb{ height:80px; overflow:hidden; }
+    .thumb img{ width:64px; height:64px; flex:0 0 64px; }
+    .thumb .name, .thumb .meta, .thumb .badge{
+      line-height:1.15;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:160px;
+    }
+
     /* Main */
     .main{position:relative;flex:1;display:flex;flex-direction:column}
     .topbar{display:block; border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
@@ -89,24 +98,25 @@
     .swipe-overlay.show{display:block}
     @media(min-width:768px){.swipe-overlay{display:none}}
 
-    /* Arrow nav (visible on all sizes; sits above swipe overlay) */
+    /* Arrow nav (mobile-only; above swipe overlay) */
     .nav-arrow{
-      position:absolute; top:64px; bottom:0; width:56px;
-      display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(to var(--side, right), rgba(17,18,20,.0), rgba(17,18,20,.35));
+      position:absolute; top:64px; bottom:0; width:64px;
+      display:none; /* hidden by default; shown on mobile below */
+      align-items:center; justify-content:center;
+      background:linear-gradient(to var(--side, right), rgba(17,18,20,.0), rgba(17,18,20,.40));
       border:none; color:#fff; cursor:pointer; outline:none;
       z-index:220; /* above overlay (200) and edges (120) */
       transition:opacity .15s ease;
     }
-    .nav-arrow:hover{background:linear-gradient(to var(--side, right), rgba(17,18,20,.0), rgba(17,18,20,.45))}
     .nav-arrow.left{left:0; --side:right}
     .nav-arrow.right{right:0; --side:left}
     .nav-arrow .chev{
-      width:26px; height:26px;
+      width:32px; height:32px;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
     }
-    @media (hover:none){
-      .nav-arrow{background:transparent}
+    /* Show arrows only on mobile widths */
+    @media (max-width: 767px){
+      .nav-arrow{ display:flex; }
     }
 
     /* Bottom rail (mobile) */
@@ -178,7 +188,7 @@
       <div class="swipe-edge left" id="edgeL" aria-hidden="true"></div>
       <div class="swipe-edge right" id="edgeR" aria-hidden="true"></div>
 
-      <!-- Arrow navigation -->
+      <!-- Arrow navigation (mobile only) -->
       <button class="nav-arrow left" id="navPrev" aria-label="Previous profile" title="Previous (←)">
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <polyline points="15 18 9 12 15 6"></polyline>
@@ -246,10 +256,10 @@
           <div class="welcome">
             <div class="wel-card">
               <h2>Welcome to the Kingdom Rescue Foster Portal</h2>
-              <p>Browse the animals below. Tap any profile to view their one‑page info sheet. Ask a volunteer if you have questions or want to apply to foster.</p>
+              <p>Browse the animals below. Tap any profile to view their one-page info sheet. Ask a volunteer if you have questions or want to apply to foster.</p>
               <div class="wel-grid">
                 <div class="wel-item">1. Scroll the thumbnail rail and tap a pet.</div>
-                <div class="wel-item">2. The profile opens here. Pinch‑zoom images or use the <em>Open in new tab</em> button for PDFs.</div>
+                <div class="wel-item">2. The profile opens here. Pinch-zoom images or use the <em>Open in new tab</em> button for PDFs.</div>
                 <div class="wel-item">3. Swipe left/right on the main area to navigate (mobile).</div>
               </div>
             </div>
@@ -345,7 +355,7 @@
           if(w>0){ (x < w/2) ? goPrev() : goNext(); }
         };
 
-        // Pointer events (cover Chrome/Android, Safari iOS 13+)
+        // Pointer events (Chrome/Android, Safari iOS 13+)
         el.addEventListener('pointerdown', (e)=>{ if(e.pointerType!=='mouse') onDown(e.clientX,e.clientY); }, {passive:true});
         el.addEventListener('pointerup', (e)=>{ if(e.pointerType!=='mouse') onUp(e.clientX,e.clientY); }, {passive:true});
 
@@ -359,7 +369,7 @@
 
       [overlay, edgeL, edgeR].forEach(bindSwipe);
 
-      // Edge click handlers for navigation (desktop)
+      // Edge click handlers for navigation (desktop too)
       if (edgeL) edgeL.addEventListener('click', goPrev);
       if (edgeR) edgeR.addEventListener('click', goNext);
     }
