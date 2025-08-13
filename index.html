@@ -153,7 +153,7 @@
   <script>
     // —— Data ——
     const ANIMALS = [
-      { id: 'welcome', name: 'Welcome', species: '', thumb: 'thumbs/welcome.jpg', profileUrl: null },
+      { id: 'welcome', name: 'Welcome', species: '', thumb: 'thumbs/welcome_thumb.jpg', profileUrl: null },
       { id: 'buckwheat', name: 'Buckwheat', species: 'Male • 4 months', thumb: 'thumbs/buckwheat_thumb.jpg', profileUrl: 'profiles/Buckwheat.png' },
       { id: 'porky', name: 'Porky', species: 'Male • 4 months', thumb: 'thumbs/porky_thumb.jpg', profileUrl: 'profiles/Porky.png' }
     ];
@@ -277,6 +277,7 @@
     attachSearch('search','searchList');
     attachSearch('searchM','searchListM');
     attachKeys();
+    attachSwipe();
     render();
   </script>
 </body>
