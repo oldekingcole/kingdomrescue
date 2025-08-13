@@ -85,7 +85,7 @@
     @media(min-width:768px){.swipe-edge{display:none}}
 
     /* Full overlay for swipe on images/welcome */
-    .swipe-overlay{position:absolute; left:0; right:0; top:64px; bottom:0; z-index:100; background:transparent; display:none;}
+    .swipe-overlay{position:absolute; left:0; right:0; top:64px; bottom:0; z-index:200; background:transparent; display:none; pointer-events:auto; touch-action:none}
     .swipe-overlay.show{display:block}
     @media(min-width:768px){.swipe-overlay{display:none}}
 
@@ -296,24 +296,34 @@
       const overlay = document.getElementById('swipeOverlay');
       const edgeL = document.getElementById('edgeL');
       const edgeR = document.getElementById('edgeR');
+
       const order = () => ANIMALS.map(a=>a.id);
       const prev = () => { const o=order(); const i=o.indexOf(activeId); setActive(o[(i-1+o.length)%o.length]); };
       const next = () => { const o=order(); const i=o.indexOf(activeId); setActive(o[(i+1)%o.length]); };
 
-      // Edges work for PDFs; overlay works for images/welcome
+      // Helper to bind both touch and pointer events
       const bindSwipe = (el) => {
-        let sx=0, sy=0, tracking=false;
-        el.addEventListener('touchstart',(e)=>{
-          if(window.innerWidth>=768 || e.touches.length!==1) return;
-          tracking=true; sx=e.touches[0].clientX; sy=e.touches[0].clientY;
-        }, {passive:true});
-        el.addEventListener('touchend',(e)=>{
-          if(!tracking) return; tracking=false;
-          const t=e.changedTouches[0];
-          const dx=t.clientX-sx, dy=t.clientY-sy;
-          if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.6){ dx<0 ? next() : prev(); }
-        }, {passive:true});
-        el.addEventListener('click', (e)=>{ if(window.innerWidth<768 && (el===edgeL || el===edgeR)) { e.preventDefault(); el===edgeL?prev():next(); } });
+        let down = null;
+        const onDown = (x,y)=>{ if(window.innerWidth<768) down={x,y,t:Date.now()}; };
+        const onUp = (x,y)=>{
+          if(!down) return; const dx=x-down.x, dy=y-down.y; down=null;
+          const absX=Math.abs(dx), absY=Math.abs(dy);
+          if(absX>50 && absX>absY*1.3){ dx<0 ? next() : prev(); return; }
+          // Fallback: taps on left/right halves also navigate
+          const w = el.getBoundingClientRect().width;
+          if(w>0){ (x < w/2) ? prev() : next(); }
+        };
+
+        // Pointer events (cover Chrome/Android, Safari iOS 13+)
+        el.addEventListener('pointerdown', (e)=>{ if(e.pointerType!=='mouse') onDown(e.clientX,e.clientY); }, {passive:true});
+        el.addEventListener('pointerup', (e)=>{ if(e.pointerType!=='mouse') onUp(e.clientX,e.clientY); }, {passive:true});
+
+        // Touch fallback (older browsers)
+        el.addEventListener('touchstart', (e)=>{ if(e.touches.length===1) onDown(e.touches[0].clientX,e.touches[0].clientY); }, {passive:true});
+        el.addEventListener('touchend', (e)=>{ const t=e.changedTouches[0]; if(t) onUp(t.clientX,t.clientY); }, {passive:true});
+
+        // Click as last resort
+        el.addEventListener('click', (e)=>{ if(window.innerWidth<768) { const rect=el.getBoundingClientRect(); onUp(e.clientX-rect.left, 0); } });
       };
 
       [overlay, edgeL, edgeR].forEach(bindSwipe);
