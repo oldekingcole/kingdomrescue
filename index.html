@@ -53,6 +53,21 @@
     .thumbs-horizontal{display:flex;gap:8px;overflow:auto;padding:8px 8px}
 
     .thumb{display:flex;align-items:center;gap:10px;border:1px solid var(--border);background:#0f1012b3;border-radius:16px;padding:8px;transition:.18s ease;position:relative}
+    /* Normalize button tiles so every thumbnail item is the same size */
+    .thumb{
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+      width: 100%;
+      height: 80px;        /* fixed tile height */
+      overflow: hidden;    /* avoid text stretching the tile */
+    }
+    .thumb > div{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;  /* center text vertically */
+      min-width: 0;             /* enable ellipsis */
+    }
     .thumb:hover{background:#0f1012cc}
     .thumb.active{outline:3px solid color-mix(in oklab,var(--accent) 55%, transparent)}
     .thumb img{width:64px;height:64px;object-fit:cover;border-radius:12px}
@@ -78,6 +93,22 @@
     .label{color:var(--muted);text-transform:uppercase;font-size:12px}
     .openbtn{border:1px solid var(--border);padding:8px 10px;border-radius:12px;background:transparent;color:var(--text)}
     .openbtn:hover{background:rgba(255,255,255,.06)}
+
+    /* Compact prev/next buttons in the title bar (safe for touch/pinch) */
+    .profile-actions{ display:flex; align-items:center; gap:8px; }
+    .profile-btn{
+      width:36px; height:36px;
+      display:inline-flex; align-items:center; justify-content:center;
+      border:1px solid var(--border); border-radius:10px;
+      background:#0f1012b3; color:var(--text);
+      cursor:pointer; outline:none;
+    }
+    .profile-btn:hover{ background:#0f1012cc; }
+    .profile-btn svg{ width:22px; height:22px; }
+    @media (max-width: 359px){
+      .profile-btn{ width:32px; height:32px; }
+      .profile-btn svg{ width:18px; height:18px; }
+    }
 
     .viewport{position:absolute;inset:64px 0 0 0}
     @media(min-width:768px){.viewport{inset:68px 0 0 0}}
@@ -146,7 +177,19 @@
           <div id="profileTitle" style="font-weight:700"></div>
           <div id="profileMeta" class="subtitle" style="margin-top:2px"></div>
         </div>
-        <a id="openExternal" class="openbtn" target="_blank" rel="noreferrer">Open in new tab</a>
+        <div class="profile-actions">
+          <button id="btnPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button id="btnNext" class="profile-btn" aria-label="Next profile" title="Next (→)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+          <a id="openExternal" class="openbtn" target="_blank" rel="noreferrer">Open in new tab</a>
+        </div>
       </div>
 
       <!-- Viewport -->
@@ -290,6 +333,18 @@
     attachSearch('search','searchList');
     attachSearch('searchM','searchListM');
     attachKeys();
+
+    // Top-bar arrow buttons (do not interfere with pinch/zoom)
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    if (btnPrev && btnNext){
+      btnPrev.addEventListener('click', goPrev);
+      btnNext.addEventListener('click', goNext);
+      // Keyboard accessibility when focused
+      [btnPrev, btnNext].forEach(btn=>{
+        btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn===btnPrev?goPrev():goNext(); }});
+      });
+    }
 
     render();
   </script>
