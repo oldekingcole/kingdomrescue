@@ -272,6 +272,35 @@
       });
     }
 
+    // —— Touch swipe (mobile) ——
+    function attachSwipe(){
+      const area = document.querySelector('.main');
+      let startX=0, startY=0, tracking=false;
+
+      area.addEventListener('touchstart',(e)=>{
+        if (window.innerWidth >= 768) return; // mobile only
+        if (e.touches.length !== 1) return;
+        tracking = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, {passive:true});
+
+      area.addEventListener('touchend',(e)=>{
+        if (!tracking) return; tracking=false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        const absX = Math.abs(dx), absY = Math.abs(dy);
+        const SWIPE_X = 60, SWIPE_RATIO = 1.6; // require mostly horizontal
+        if (absX > SWIPE_X && absX > absY * SWIPE_RATIO){
+          const order = ANIMALS.map(a=>a.id);
+          const i = order.indexOf(activeId);
+          if (dx < 0) setActive(order[(i+1)%order.length]); // swipe left = next
+          else setActive(order[(i-1+order.length)%order.length]); // swipe right = prev
+        }
+      }, {passive:true});
+    }
+
     // Init
     buildThumbs();
     attachSearch('search','searchList');
