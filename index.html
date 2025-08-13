@@ -75,8 +75,17 @@
     .viewport iframe,.viewport img{width:100%;height:100%;display:block}
     .viewport img{object-fit:contain;background:black}
 
+    /* Touch: allow vertical panning inside content */
+    .viewport{touch-action: pan-y}
+
+    /* Swipe edges (mobile only) */
+    .swipe-edge{position:absolute; top:64px; bottom:0; width:14%; z-index:40; background:transparent}
+    .swipe-edge.left{left:0}
+    .swipe-edge.right{right:0}
+    @media(min-width:768px){.swipe-edge{display:none}}
+
     /* Bottom rail (mobile) */
-    .bottomrail{border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px)}
+    .bottomrail{border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);position:relative;z-index:60}
     @media(min-width:768px){.bottomrail{display:none}}
 
     /* Welcome panel */
@@ -139,9 +148,9 @@
       </div>
 
       <!-- Viewport -->
-      <div class="viewport" id="viewport">
-        <!-- dynamic content injected here -->
-      </div>
+      <div class="viewport" id="viewport"><!-- dynamic content injected here --></div>
+      <div class="swipe-edge left" id="edgeL" aria-hidden="true"></div>
+      <div class="swipe-edge right" id="edgeR" aria-hidden="true"></div>
 
       <!-- Bottom thumbnails (mobile) -->
       <div class="bottomrail">
@@ -153,7 +162,7 @@
   <script>
     // —— Data ——
     const ANIMALS = [
-      { id: 'welcome', name: 'Welcome', species: '', thumb: 'thumbs/welcome_thumb.jpg', profileUrl: null },
+      { id: 'welcome', name: 'Welcome', species: '', thumb: 'thumbs/welcome_thumb.jpg', profileUrl: 'profiles/welcome_full.png' },
       { id: 'buckwheat', name: 'Buckwheat', species: 'Male • 4 months', thumb: 'thumbs/buckwheat_thumb.jpg', profileUrl: 'profiles/Buckwheat.png' },
       { id: 'porky', name: 'Porky', species: 'Male • 4 months', thumb: 'thumbs/porky_thumb.jpg', profileUrl: 'profiles/Porky.png' }
     ];
@@ -183,7 +192,7 @@
       const open = document.getElementById('openExternal');
       const vp = document.getElementById('viewport');
 
-      if(!active || active.id==='welcome'){
+      if(!active || (active.id==='welcome' && !active.profileUrl)){
         title.textContent = 'Welcome';
         meta.textContent = 'How it works';
         open.href = '#';
@@ -274,30 +283,30 @@
 
     // —— Touch swipe (mobile) ——
     function attachSwipe(){
-      const area = document.querySelector('.main');
+      const area = document.getElementById('viewport');
+      const edgeL = document.getElementById('edgeL');
+      const edgeR = document.getElementById('edgeR');
+      const order = () => ANIMALS.map(a=>a.id);
+      const prev = () => { const o=order(); const i=o.indexOf(activeId); setActive(o[(i-1+o.length)%o.length]); };
+      const next = () => { const o=order(); const i=o.indexOf(activeId); setActive(o[(i+1)%o.length]); };
+
+      // Edge taps / swipes (works even when a PDF iframe is present)
+      ['touchend','click'].forEach(evt=>{
+        edgeL.addEventListener(evt, ()=>{ if(window.innerWidth<768) prev(); }, {passive:true});
+        edgeR.addEventListener(evt, ()=>{ if(window.innerWidth<768) next(); }, {passive:true});
+      });
+
+      // General swipe in viewport for images/welcome
       let startX=0, startY=0, tracking=false;
-
       area.addEventListener('touchstart',(e)=>{
-        if (window.innerWidth >= 768) return; // mobile only
-        if (e.touches.length !== 1) return;
-        tracking = true;
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
+        if(window.innerWidth>=768 || e.touches.length!==1) return;
+        tracking=true; startX=e.touches[0].clientX; startY=e.touches[0].clientY;
       }, {passive:true});
-
       area.addEventListener('touchend',(e)=>{
-        if (!tracking) return; tracking=false;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-        const absX = Math.abs(dx), absY = Math.abs(dy);
-        const SWIPE_X = 60, SWIPE_RATIO = 1.6; // require mostly horizontal
-        if (absX > SWIPE_X && absX > absY * SWIPE_RATIO){
-          const order = ANIMALS.map(a=>a.id);
-          const i = order.indexOf(activeId);
-          if (dx < 0) setActive(order[(i+1)%order.length]); // swipe left = next
-          else setActive(order[(i-1+order.length)%order.length]); // swipe right = prev
-        }
+        if(!tracking) return; tracking=false;
+        const t=e.changedTouches[0];
+        const dx=t.clientX-startX; const dy=t.clientY-startY;
+        if(Math.abs(dx)>60 && Math.abs(dx) > Math.abs(dy)*1.6){ dx<0 ? next() : prev(); }
       }, {passive:true});
     }
 
