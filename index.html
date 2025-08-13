@@ -110,6 +110,19 @@
       .profile-btn svg{ width:18px; height:18px; }
     }
 
+    /* Bottom arrow controls inside the main viewfinder (non-blocking for pinch/zoom) */
+    .view-actions{
+      position:absolute;
+      left:0; right:0;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      pointer-events:auto;
+      z-index:20; /* above image/iframe (z=10), below top bars */
+      bottom:8px; /* desktop / when no bottom rail */
+    }
+    @media (max-width: 767px){
+      .view-actions{ bottom:72px; } /* clear the mobile thumbnail rail */
+    }
+
     .viewport{position:absolute;inset:64px 0 0 0}
     @media(min-width:768px){.viewport{inset:68px 0 0 0}}
     .viewport iframe,.viewport img{width:100%;height:100%;display:block;position:relative;z-index:10}
@@ -194,6 +207,20 @@
 
       <!-- Viewport -->
       <div class="viewport" id="viewport"><!-- dynamic content injected here --></div>
+
+      <!-- Bottom arrow navigation -->
+      <div class="view-actions">
+        <button id="viewPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button id="viewNext" class="profile-btn" aria-label="Next profile" title="Next (→)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
 
       <!-- Bottom thumbnails (mobile) -->
       <div class="bottomrail">
@@ -343,6 +370,18 @@
       // Keyboard accessibility when focused
       [btnPrev, btnNext].forEach(btn=>{
         btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn===btnPrev?goPrev():goNext(); }});
+      });
+    }
+
+    // Bottom viewfinder arrows
+    const viewPrev = document.getElementById('viewPrev');
+    const viewNext = document.getElementById('viewNext');
+    if (viewPrev && viewNext){
+      viewPrev.addEventListener('click', goPrev);
+      viewNext.addEventListener('click', goNext);
+      // Keyboard accessibility when focused
+      [viewPrev, viewNext].forEach(btn=>{
+        btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn===viewPrev?goPrev():goNext(); }});
       });
     }
 
