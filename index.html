@@ -85,39 +85,6 @@
     .viewport img{object-fit:contain;background:black}
 
     /* Touch: allow vertical panning inside content */
-    .viewport{touch-action: pan-y}
-
-    /* Swipe edges (mobile only) */
-    .swipe-edge{position:absolute; top:64px; bottom:0; width:20%; z-index:120; background:transparent; pointer-events:auto}
-    .swipe-edge.left{left:0}
-    .swipe-edge.right{right:0}
-    @media(min-width:768px){.swipe-edge{display:none}}
-
-    /* Full overlay for swipe on images/welcome */
-    .swipe-overlay{position:absolute; left:0; right:0; top:64px; bottom:0; z-index:200; background:transparent; display:none; pointer-events:auto; touch-action:none}
-    .swipe-overlay.show{display:block}
-    @media(min-width:768px){.swipe-overlay{display:none}}
-
-    /* Arrow nav (mobile-only; above swipe overlay) */
-    .nav-arrow{
-      position:absolute; top:64px; bottom:0; width:64px;
-      display:none; /* hidden by default; shown on mobile below */
-      align-items:center; justify-content:center;
-      background:linear-gradient(to var(--side, right), rgba(17,18,20,.0), rgba(17,18,20,.40));
-      border:none; color:#fff; cursor:pointer; outline:none;
-      z-index:220; /* above overlay (200) and edges (120) */
-      transition:opacity .15s ease;
-    }
-    .nav-arrow.left{left:0; --side:right}
-    .nav-arrow.right{right:0; --side:left}
-    .nav-arrow .chev{
-      width:32px; height:32px;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
-    }
-    /* Show arrows only on mobile widths */
-    @media (max-width: 767px){
-      .nav-arrow{ display:flex; }
-    }
 
     /* Bottom rail (mobile) */
     .bottomrail{border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);position:relative;z-index:60}
@@ -184,21 +151,6 @@
 
       <!-- Viewport -->
       <div class="viewport" id="viewport"><!-- dynamic content injected here --></div>
-      <div class="swipe-overlay" id="swipeOverlay" aria-hidden="true"></div>
-      <div class="swipe-edge left" id="edgeL" aria-hidden="true"></div>
-      <div class="swipe-edge right" id="edgeR" aria-hidden="true"></div>
-
-      <!-- Arrow navigation (mobile only) -->
-      <button class="nav-arrow left" id="navPrev" aria-label="Previous profile" title="Previous (←)">
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-      <button class="nav-arrow right" id="navNext" aria-label="Next profile" title="Next (→)">
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
 
       <!-- Bottom thumbnails (mobile) -->
       <div class="bottomrail">
@@ -244,7 +196,6 @@
       const meta = document.getElementById('profileMeta');
       const open = document.getElementById('openExternal');
       const vp = document.getElementById('viewport');
-      const overlay = document.getElementById('swipeOverlay');
 
       if(!active || (active.id==='welcome' && !active.profileUrl)){
         title.textContent = 'Welcome';
@@ -260,11 +211,10 @@
               <div class="wel-grid">
                 <div class="wel-item">1. Scroll the thumbnail rail and tap a pet.</div>
                 <div class="wel-item">2. The profile opens here. Pinch-zoom images or use the <em>Open in new tab</em> button for PDFs.</div>
-                <div class="wel-item">3. Swipe left/right on the main area to navigate (mobile).</div>
+                <div class="wel-item">3. Use the thumbnails to navigate, or arrow keys on desktop.</div>
               </div>
             </div>
           </div>`;
-        overlay.classList.add('show');
         return;
       }
 
@@ -276,10 +226,8 @@
 
       if(isPdf(active.profileUrl)){
         vp.innerHTML = `<iframe title="${active.name} profile" src="${active.profileUrl}" loading="lazy"></iframe>`;
-        overlay.classList.remove('show'); // use edge strips for PDFs
       } else {
         vp.innerHTML = `<img alt="${active.name} profile" src="${active.profileUrl}" loading="lazy">`;
-        overlay.classList.add('show');
       }
     }
 
@@ -336,63 +284,12 @@
       });
     }
 
-    // —— Touch swipe (mobile) ——
-    function attachSwipe(){
-      const overlay = document.getElementById('swipeOverlay');
-      const edgeL = document.getElementById('edgeL');
-      const edgeR = document.getElementById('edgeR');
-
-      // Helper to bind both touch and pointer events
-      const bindSwipe = (el) => {
-        let down = null;
-        const onDown = (x,y)=>{ if(window.innerWidth<768) down={x,y,t:Date.now()}; };
-        const onUp = (x,y)=>{
-          if(!down) return; const dx=x-down.x, dy=y-down.y; down=null;
-          const absX=Math.abs(dx), absY=Math.abs(dy);
-          if(absX>50 && absX>absY*1.3){ dx<0 ? goNext() : goPrev(); return; }
-          // Fallback: taps on left/right halves also navigate
-          const w = el.getBoundingClientRect().width;
-          if(w>0){ (x < w/2) ? goPrev() : goNext(); }
-        };
-
-        // Pointer events (Chrome/Android, Safari iOS 13+)
-        el.addEventListener('pointerdown', (e)=>{ if(e.pointerType!=='mouse') onDown(e.clientX,e.clientY); }, {passive:true});
-        el.addEventListener('pointerup', (e)=>{ if(e.pointerType!=='mouse') onUp(e.clientX,e.clientY); }, {passive:true});
-
-        // Touch fallback (older browsers)
-        el.addEventListener('touchstart', (e)=>{ if(e.touches.length===1) onDown(e.touches[0].clientX,e.touches[0].clientY); }, {passive:true});
-        el.addEventListener('touchend', (e)=>{ const t=e.changedTouches[0]; if(t) onUp(t.clientX,t.clientY); }, {passive:true});
-
-        // Click as last resort
-        el.addEventListener('click', (e)=>{ if(window.innerWidth<768) { const rect=el.getBoundingClientRect(); onUp(e.clientX-rect.left, 0); } });
-      };
-
-      [overlay, edgeL, edgeR].forEach(bindSwipe);
-
-      // Edge click handlers for navigation (desktop too)
-      if (edgeL) edgeL.addEventListener('click', goPrev);
-      if (edgeR) edgeR.addEventListener('click', goNext);
-    }
 
     // Init
     buildThumbs();
     attachSearch('search','searchList');
     attachSearch('searchM','searchListM');
     attachKeys();
-    attachSwipe();
-    // Arrow buttons
-    const navPrev = document.getElementById('navPrev');
-    const navNext = document.getElementById('navNext');
-    if (navPrev && navNext){
-      ['click','pointerup','touchend'].forEach(evt=>{
-        navPrev.addEventListener(evt, (e)=>{ if(evt==='click' || (e.pointerType && e.pointerType!=='mouse') ) goPrev(); }, {passive:true});
-        navNext.addEventListener(evt, (e)=>{ if(evt==='click' || (e.pointerType && e.pointerType!=='mouse') ) goNext(); }, {passive:true});
-      });
-      // Keyboard accessibility when focused
-      [navPrev, navNext].forEach(btn=>{
-        btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn===navPrev?goPrev():goNext(); }});
-      });
-    }
 
     render();
   </script>
