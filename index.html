@@ -198,6 +198,8 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
+    function startApp(){  /* ===== EVERYTHING inside this function ===== */
+
     /* ======================
        1) DATA
        ====================== */
@@ -223,14 +225,14 @@
     let fbReady = false, auth = null, db = null;
 
     try{
-      // 🔐 PASTE YOUR FIREBASE CONFIG BELOW (from Firebase Console → Project settings → General → Your apps → Web app)
+      // 🔐 Your Firebase config
       const firebaseConfig = {
-          apiKey: "AIzaSyDKAfB4KVwMS3aXJxrQgqy6GiX0GalzIlw",
-            authDomain: "kingdomrescue-4fa02.firebaseapp.com",
-            projectId: "kingdomrescue-4fa02",
-            storageBucket: "kingdomrescue-4fa02.firebasestorage.app",
-            messagingSenderId: "178736516158",
-            appId: "1:178736516158:web:2f42c123f151044edf556f"
+        apiKey: "AIzaSyDKAfB4KVwMS3aXJxrQgqy6GiX0GalzIlw",
+        authDomain: "kingdomrescue-4fa02.firebaseapp.com",
+        projectId: "kingdomrescue-4fa02",
+        storageBucket: "kingdomrescue-4fa02.firebasestorage.app",
+        messagingSenderId: "178736516158",
+        appId: "1:178736516158:web:2f42c123f151044edf556f"
       };
       if (Object.keys(firebaseConfig).length){
         firebase.initializeApp(firebaseConfig);
@@ -271,12 +273,10 @@
         const after  = JSON.stringify([...next].sort());
         adoptedSet = next;
         if (before !== after){
-          // Rebuild visible lists and keep a valid active card
           buildThumbs();
           const ids = order();
           if(!ids.includes(activeId)) activeId = ids[0];
           render();
-          // Notify any admin panel instance to refresh its toggles
           window.dispatchEvent(new CustomEvent('adopted-updated'));
         }
       }, err=>{
@@ -555,6 +555,12 @@
       startRealtime(); // always start realtime (no-op if no Firebase)
     }
     boot();
+
+    } /* ===== end startApp ===== */
+
+    // Ensure Firebase SDKs (deferred) are loaded before running app code
+    if (window.firebase) startApp();
+    else window.addEventListener('load', startApp);
   </script>
 </body>
 </html>
