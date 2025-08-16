@@ -51,7 +51,7 @@
     }
     .brand{display:flex;align-items:center;gap:12px}
 
-    /* 🔁 changed: logo is now an <img> */
+    /* 🔁 logo is an <img> */
     .logo{
       width:40px;height:40px;border-radius:10px;
       object-fit:contain; object-position:center;
@@ -89,7 +89,7 @@
       border:1px solid var(--border);background:#0f1012b3;border-radius:16px;
       padding:8px;transition:.18s ease;position:relative;
       -webkit-appearance:none;appearance:none;margin:0;width:100%;height:80px;overflow:hidden;
-      color:var(--text); /* ensure text inside button is the UI text color */
+      color:var(--text);
     }
     .thumb:hover{background:#0f1012cc}
     .thumb.active{outline:3px solid color-mix(in oklab,var(--accent) 55%, transparent)}
@@ -98,8 +98,7 @@
     }
     .thumb > div{display:flex;flex-direction:column;justify-content:center;min-width:0}
     .thumb .name{
-      font-weight:600;font-size:14px;
-      color:var(--text); /* explicitly set name color */
+      font-weight:600;font-size:14px;color:var(--text);
     }
     .thumb .meta{color:var(--muted);font-size:12px}
     .badge{font-size:10px;color:#7bfcc7}
@@ -131,6 +130,11 @@
       margin-left:8px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;
       background:#0b0c0fcc;color:#e5e7eb;font-weight:700;letter-spacing:.2px
     }
+    /* Fit toggle button (mobile only) */
+    .fitbtn{border:1px solid var(--border);padding:8px 10px;border-radius:12px;background:transparent;color:var(--text)}
+    .fitbtn:hover{background:rgba(255,255,255,.06)}
+    @media(min-width:768px){ .fitbtn{display:none} }
+
     @media (max-width: 359px){
       .profile-btn{width:32px;height:32px}
       .profile-btn svg{width:18px;height:18px}
@@ -142,6 +146,10 @@
     @media(max-width:767px){.viewport{bottom:calc(var(--railH) + env(safe-area-inset-bottom,0px))}}
     .viewport iframe,.viewport img{width:100%;height:100%;display:block;position:relative;z-index:10}
     .viewport img{object-fit:contain;background:black}
+
+    /* ✅ When user toggles Fit Width (body.has class .fit-width), images fill width & can scroll */
+    .fit-width .viewport{overflow:auto}
+    .fit-width .viewport img{height:auto; width:100%; object-fit:unset}
 
     /* Under-viewport arrows + note */
     .view-actions{
@@ -183,7 +191,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="header">
         <div class="brand">
-          <!-- 🔁 was a green square; now your logo image -->
+          <!-- logo image -->
           <img src="assets/krlogo.jpeg" alt="Kingdom Rescue logo" class="logo" />
           <div>
             <div class="title">Kingdom Rescue</div>
@@ -204,7 +212,6 @@
       <div class="topbar mobile">
         <div class="header">
           <div class="brand">
-            <!-- 🔁 mobile header logo too -->
             <img src="assets/krlogo.jpeg" alt="Kingdom Rescue logo" class="logo" />
             <div>
               <div class="title">Kingdom Rescue</div>
@@ -234,6 +241,8 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <a id="openExternal" class="openbtn" target="_blank" rel="noreferrer">Open in new tab</a>
+          <!-- 👇 New toggle (mobile only) -->
+          <button id="fitToggle" class="fitbtn" aria-pressed="false" title="Toggle between Fit width and Fit screen">Fit width</button>
         </div>
       </div>
 
@@ -468,11 +477,12 @@
       document.addEventListener('click',(e)=>{ if(!list.contains(e.target) && e.target!==input) list.classList.add('hidden'); });
     }
 
-    // Keyboard
+    // Keyboard (incl. Fit toggle on "f")
     function attachKeys(){
       window.addEventListener('keydown',(e)=>{
         if(['ArrowLeft','ArrowUp','a','w'].includes(e.key)) goPrev();
         if(['ArrowRight','ArrowDown','d','s'].includes(e.key)) goNext();
+        if(e.key.toLowerCase()==='f'){ toggleFit(); }
       });
     }
 
@@ -598,6 +608,17 @@
     /* ======================
        6) BOOT
        ====================== */
+    let fitWidth = false;
+    function applyFit(){
+      document.body.classList.toggle('fit-width', fitWidth);
+      const btn = document.getElementById('fitToggle');
+      if(btn){
+        btn.textContent = fitWidth ? 'Fit screen' : 'Fit width';
+        btn.setAttribute('aria-pressed', String(fitWidth));
+      }
+    }
+    function toggleFit(){ fitWidth = !fitWidth; applyFit(); }
+
     async function boot(){
       await loadAdoptedOnce();   // safe even if Firebase isn't configured
       buildThumbs();
@@ -616,6 +637,11 @@
         if(!btn) return;
         btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); (btn===btnPrev||btn===viewPrev)?goPrev():goNext(); }});
       });
+
+      // Fit toggle
+      const fitBtn = document.getElementById('fitToggle');
+      if(fitBtn){ fitBtn.addEventListener('click', toggleFit); }
+      applyFit(); // initialize
 
       const ids = order();
       if(!ids.includes(activeId)) activeId = ids[0];
