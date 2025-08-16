@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kingdom Rescue – Foster Portal</title>
   <style>
+    /* —— Theme —— */
     :root{
-      --bg:#0a0a0b; --border:#ffffff1a; --text:#f4f4f5; --muted:#a1a1aa;
-      --accent:#10b981; --accent-2:#14b8a6; --shadow:0 10px 30px rgba(0,0,0,.45);
-      --railH:72px; /* mobile bottom rail height */
+      --bg:#0a0a0b;
+      --panel:#111214cc;
+      --border:#ffffff1a;
+      --text:#f4f4f5;
+      --muted:#a1a1aa;
+      --accent:#10b981;
+      --accent-2:#14b8a6;
+      --shadow:0 10px 30px rgba(0,0,0,.45);
+      --railH:72px;           /* mobile bottom rail height */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -18,15 +25,15 @@
     .no-scrollbar{scrollbar-width:none}
     .no-scrollbar::-webkit-scrollbar{display:none}
 
-    /* App layout */
+    /* —— App Layout —— */
     .app{height:100dvh;width:100vw;display:flex;flex-direction:column;overflow:hidden}
     @media(min-width:768px){.app{flex-direction:row}}
 
-    /* Sidebar (desktop only) */
+    /* Sidebar (desktop) */
     .sidebar{display:none;width:288px;flex:0 0 288px;border-right:1px solid var(--border);background:#0b0c0dcc;backdrop-filter:saturate(120%) blur(8px)}
     @media(min-width:768px){.sidebar{display:flex;flex-direction:column}}
 
-    /* Header/brand */
+    /* Header */
     .header{padding:16px 16px 8px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
     .brand{display:flex;align-items:center;gap:12px}
     .logo{width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:var(--shadow)}
@@ -42,15 +49,19 @@
     .search-item:hover{background:rgba(255,255,255,.05)}
     .search-item small{display:block;color:var(--muted)}
 
-    /* Thumbs */
+    /* Thumbnails */
     .thumbs-vertical{flex:1;overflow:auto;padding:0 12px 12px}
-    .thumbs-horizontal{display:flex;gap:8px;overflow:auto;padding:8px}
-    .thumb{display:flex;align-items:center;gap:10px;border:1px solid var(--border);background:#0f1012b3;border-radius:16px;padding:8px;transition:.18s ease;position:relative}
-    .thumb{-webkit-appearance:none;appearance:none;margin:0;width:100%;height:80px;overflow:hidden}
-    .thumb > div{display:flex;flex-direction:column;justify-content:center;min-width:0}
+    .thumbs-horizontal{display:flex;gap:8px;overflow:auto;padding:8px 8px}
+    .thumb{
+      display:flex;align-items:center;gap:10px;
+      border:1px solid var(--border);background:#0f1012b3;border-radius:16px;
+      padding:8px;transition:.18s ease;position:relative;
+      -webkit-appearance:none;appearance:none;margin:0;width:100%;height:80px;overflow:hidden;
+    }
     .thumb:hover{background:#0f1012cc}
     .thumb.active{outline:3px solid color-mix(in oklab,var(--accent) 55%, transparent)}
     .thumb img{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:0 0 64px;background:#111}
+    .thumb > div{display:flex;flex-direction:column;justify-content:center;min-width:0}
     .thumb .name{font-weight:600;font-size:14px}
     .thumb .meta{color:var(--muted);font-size:12px}
     .badge{font-size:10px;color:#7bfcc7}
@@ -66,32 +77,32 @@
     .openbtn{border:1px solid var(--border);padding:8px 10px;border-radius:12px;background:transparent;color:var(--text)}
     .openbtn:hover{background:rgba(255,255,255,.06)}
     .profile-actions{display:flex;align-items:center;gap:8px}
-    .profile-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:10px;background:#0f1012b3;color:var(--text);cursor:pointer;outline:none}
+    .profile-btn{
+      width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
+      border:1px solid var(--border);border-radius:10px;background:#0f1012b3;color:var(--text);cursor:pointer;outline:none;
+    }
     .profile-btn:hover{background:#0f1012cc}
     .profile-btn svg{width:22px;height:22px}
     .fee{margin-left:8px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#0b0c0fcc;color:#e5e7eb;font-weight:700;letter-spacing:.2px}
-    @media(max-width:359px){.profile-btn{width:32px;height:32px}.profile-btn svg{width:18px;height:18px}.fee{padding:5px 8px;font-size:12px}}
+    @media (max-width: 359px){.profile-btn{width:32px;height:32px}.profile-btn svg{width:18px;height:18px}.fee{padding:5px 8px;font-size:12px}}
 
-    /* Viewport reserves space for bottom rail on mobile */
     .viewport{position:absolute;left:0;right:0;top:64px;bottom:0}
-    @media(min-width:768px){.viewport{top:68px;bottom:0}}
+    @media(min-width:768px){.viewport{top:68px}}
     @media(max-width:767px){.viewport{bottom:calc(var(--railH) + env(safe-area-inset-bottom,0px))}}
     .viewport iframe,.viewport img{width:100%;height:100%;display:block;position:relative;z-index:10}
     .viewport img{object-fit:contain;background:black}
 
-    /* Bottom arrows inside viewfinder */
+    /* Under-viewport arrows + note */
     .view-actions{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:auto;z-index:20;bottom:8px}
     @media(max-width:767px){.view-actions{bottom:calc(var(--railH) + 8px)}}
-
-    /* Fee footnote */
     .note{position:absolute;left:0;right:0;bottom:calc(var(--railH) + 36px);text-align:center;color:var(--muted);font-size:12px}
     @media(min-width:768px){.note{bottom:18px}}
 
-    /* Mobile bottom thumbnail rail (pinned) */
-    .bottomrail{position:absolute;left:0;right:0;bottom:0;height:var(--railH);border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);z-index:60}
+    /* Bottom rail (mobile) */
+    .bottomrail{border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);position:absolute;left:0;right:0;bottom:0;height:var(--railH);z-index:60}
     @media(min-width:768px){.bottomrail{display:none}}
 
-    /* Welcome fallback panel (only used if no welcome image provided) */
+    /* Welcome fallback */
     .welcome{position:absolute;inset:0;display:grid;place-items:center;padding:24px}
     .wel-card{max-width:900px;width:min(100%,900px);border:1px solid var(--border);border-radius:24px;background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(20,184,166,.08));padding:28px;box-shadow:var(--shadow)}
     .wel-card h2{margin:0 0 8px;font-size:22px}
@@ -104,7 +115,7 @@
 <body>
   <div class="app">
     <!-- Sidebar (desktop) -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="header">
         <div class="brand">
           <div class="logo" aria-hidden="true"></div>
@@ -150,349 +161,400 @@
         <div class="profile-actions">
           <span class="fee">Adoption fee: $125</span>
           <button id="btnPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <button id="btnNext" class="profile-btn" aria-label="Next profile" title="Next (→)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <a id="openExternal" class="openbtn" target="_blank" rel="noreferrer">Open in new tab</a>
         </div>
       </div>
 
-      <!-- Main viewport -->
+      <!-- Viewport -->
       <div class="viewport" id="viewport"></div>
 
-      <!-- Bottom arrows within viewfinder -->
+      <!-- Arrows under viewport -->
       <div class="view-actions">
         <button id="viewPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <button id="viewNext" class="profile-btn" aria-label="Next profile" title="Next (→)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
 
       <div class="note">Adoption fee for all cats is <strong>$125</strong>.</div>
 
-      <!-- Mobile bottom thumb rail -->
+      <!-- Bottom thumbnails (mobile) -->
       <div class="bottomrail">
         <div id="thumbsHorizontal" class="thumbs-horizontal no-scrollbar"></div>
       </div>
     </main>
   </div>
 
-  <!-- Firebase SDKs (safe to include even if you don't use them yet) -->
+  <!-- Firebase SDKs -->
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-  /* ============================================================
-     Everything runs after the page + deferred SDKs are loaded
-     ============================================================ */
-  window.addEventListener('load', () => {
+    /* ======================
+       1) DATA
+       ====================== */
+    const ANIMALS = [
+      { id:'welcome',        name:'Welcome',       species:'',                  thumb:'thumbs/welcome_thumb.png',       profileUrl:'profiles/welcome_full.png' },
+      { id:'adoption_info',  name:'Adoption Info', species:'Rescue details',    thumb:'thumbs/adoption_info_thumb.jpg',  profileUrl:'profiles/adoption_info.png' },
 
-  /* 1) DATA (unchanged) */
-  const ANIMALS = [
-    { id:'welcome',        name:'Welcome',       species:'',                  thumb:'thumbs/welcome_thumb.png',       profileUrl:'profiles/welcome_full.png' },
-    { id:'adoption_info',  name:'Adoption Info', species:'Rescue details',    thumb:'thumbs/adoption_info_thumb.jpg',  profileUrl:'profiles/adoption_info.png' },
+      { id:'aj',        name:'A.J.',          species:'Male • 4 months',   thumb:'thumbs/aj_thumb.jpg',        profileUrl:'profiles/aj.png' },
+      { id:'alfalfa',   name:'Alfalfa',       species:'Male • 4 months',   thumb:'thumbs/alfalfa_thumb.jpg',   profileUrl:'profiles/alfalfa.png' },
+      { id:'april',     name:"April O'Neil",  species:'Female • 1 year',   thumb:'thumbs/april_thumb.jpg',     profileUrl:'profiles/april.png' },
+      { id:'buckwheat', name:'Buckwheat',     species:'Male • 4 months',   thumb:'thumbs/buckwheat_thumb.jpg', profileUrl:'profiles/buckwheat.png' },
+      { id:'dolly',     name:'Dolly',         species:'Female • 3 months', thumb:'thumbs/dolly_thumb.jpg',     profileUrl:'profiles/dolly.png' },
+      { id:'donovan',   name:'Donovan',       species:'Male • 2 years',    thumb:'thumbs/donovan_thumb.jpg',   profileUrl:'profiles/donovan.png' },
+      { id:'jean',      name:'Jean Darling',  species:'Female • 4 months', thumb:'thumbs/jean_thumb.jpg',      profileUrl:'profiles/jean.png' },
+      { id:'joey',      name:'Joey',          species:'Male • 6 months',   thumb:'thumbs/joey_thumb.jpg',      profileUrl:'profiles/joey.png' },
+      { id:'labooboo',  name:'La-Boo-Boo',    species:'Female • 4 months', thumb:'thumbs/labooboo_thumb.jpg',  profileUrl:'profiles/labooboo.png' },
+      { id:'porky',     name:'Porky',         species:'Male • 4 months',   thumb:'thumbs/porky_thumb.jpg',     profileUrl:'profiles/Porky.png' }
+    ];
 
-    { id:'aj',        name:'A.J.',          species:'Male • 4 months',   thumb:'thumbs/aj_thumb.jpg',        profileUrl:'profiles/aj.png' },
-    { id:'alfalfa',   name:'Alfalfa',       species:'Male • 4 months',   thumb:'thumbs/alfalfa_thumb.jpg',   profileUrl:'profiles/alfalfa.png' },
-    { id:'april',     name:"April O'Neil",  species:'Female • 1 year',   thumb:'thumbs/april_thumb.jpg',     profileUrl:'profiles/april.png' },
-    { id:'buckwheat', name:'Buckwheat',     species:'Male • 4 months',   thumb:'thumbs/buckwheat_thumb.jpg', profileUrl:'profiles/buckwheat.png' },
-    { id:'dolly',     name:'Dolly',         species:'Female • 3 months', thumb:'thumbs/dolly_thumb.jpg',     profileUrl:'profiles/dolly.png' },
-    { id:'donovan',   name:'Donovan',       species:'Male • 2 years',    thumb:'thumbs/donovan_thumb.jpg',   profileUrl:'profiles/donovan.png' },
-    { id:'jean',      name:'Jean Darling',  species:'Female • 4 months', thumb:'thumbs/jean_thumb.jpg',      profileUrl:'profiles/jean.png' },
-    { id:'joey',      name:'Joey',          species:'Male • 6 months',   thumb:'thumbs/joey_thumb.jpg',      profileUrl:'profiles/joey.png' },
-    { id:'labooboo',  name:'La-Boo-Boo',    species:'Female • 4 months', thumb:'thumbs/labooboo_thumb.jpg',  profileUrl:'profiles/labooboo.png' },
-    { id:'porky',     name:'Porky',         species:'Male • 4 months',   thumb:'thumbs/porky_thumb.jpg',     profileUrl:'profiles/porky.png' }
-  ];
+    /* ======================
+       2) FIREBASE INIT (paste your config)
+       ====================== */
+    let fbReady = false, auth = null, db = null;
 
-  /* 2) Firebase init (now guaranteed to run after SDKs have loaded) */
-  let fbReady = false, auth = null, db = null;
-  try{
-    const firebaseConfig = {
-      apiKey: "AIzaSyDKAfB4KVwMS3aXJxrQgqy6GiX0GalzIlw",
-      authDomain: "kingdomrescue-4fa02.firebaseapp.com",
-      projectId: "kingdomrescue-4fa02",
-      storageBucket: "kingdomrescue-4fa02.appspot.com",  // ← updated
-      messagingSenderId: "178736516158",
-      appId: "1:178736516158:web:2f42c123f151044edf556f"
-    };
-    if (window.firebase && Object.keys(firebaseConfig).length){
-      firebase.initializeApp(firebaseConfig);
-      auth = firebase.auth();
-      db   = firebase.firestore();
-      fbReady = true;
-    }
-  }catch(e){
-    fbReady = false;
-  }
-
-  /* 3) Adopted state */
-  let adoptedSet = new Set();
-  async function loadAdopted(){
-    adoptedSet = new Set();
-    if (!fbReady) return;
     try{
-      const snap = await db.collection('adoption_status').get();
-      snap.forEach(doc=>{
-        const row = doc.data();
-        if (row && row.adopted === true) adoptedSet.add(doc.id);
-      });
-    }catch(err){
-      console.warn('Adoption status load error:', err);
+      // 🔐 PASTE YOUR FIREBASE CONFIG BELOW (from Firebase Console → Project settings → General → Your apps → Web app)
+      const firebaseConfig = {
+          apiKey: "AIzaSyDKAfB4KVwMS3aXJxrQgqy6GiX0GalzIlw",
+            authDomain: "kingdomrescue-4fa02.firebaseapp.com",
+            projectId: "kingdomrescue-4fa02",
+            storageBucket: "kingdomrescue-4fa02.firebasestorage.app",
+            messagingSenderId: "178736516158",
+            appId: "1:178736516158:web:2f42c123f151044edf556f"
+      };
+      if (Object.keys(firebaseConfig).length){
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db   = firebase.firestore();
+        fbReady = true;
+      }
+    }catch(e){
+      console.warn('Firebase init failed; running in no-backend mode.', e);
+      fbReady = false;
+    }
+
+    /* ======================
+       3) ADOPTED STATE (Firestore + realtime)
+       ====================== */
+    let adoptedSet = new Set();
+    let unsubStatus = null;
+
+    async function loadAdoptedOnce(){
       adoptedSet = new Set();
-    }
-  }
-  const isSystem = id => id==='welcome' || id==='adoption_info';
-  function visibleAnimals(){
-    const list = ANIMALS.filter(a => isSystem(a.id) || !adoptedSet.has(a.id));
-    return list.length ? list : ANIMALS.slice();
-  }
-
-  /* 4) UI helpers */
-  const qs = new URL(location.href);
-  let activeId = qs.searchParams.get('id') || ANIMALS[0].id;
-
-  const order = () => visibleAnimals().map(a=>a.id);
-  function goPrev(){ const o=order(); const i=o.indexOf(activeId); setActive(o[(i-1+o.length)%o.length]); }
-  function goNext(){ const o=order(); const i=o.indexOf(activeId); setActive(o[(i+1)%o.length]); }
-
-  function setActive(id){
-    activeId = id;
-    const u = new URL(location.href); u.searchParams.set('id', id); history.replaceState({}, '', u);
-    render();
-    document.querySelectorAll('.thumb').forEach(el=>el.classList.toggle('active', el.dataset.id===id));
-  }
-  const isPdf = url => (url||'').toLowerCase().endsWith('.pdf');
-
-  function render(){
-    const list = visibleAnimals();
-    const active = list.find(a=>a.id===activeId) || list[0] || ANIMALS[0];
-
-    const title = document.getElementById('profileTitle');
-    const meta  = document.getElementById('profileMeta');
-    const open  = document.getElementById('openExternal');
-    const vp    = document.getElementById('viewport');
-
-    title.textContent = active?.name || 'Profile';
-    meta.textContent  = active?.species || '';
-
-    if (active?.profileUrl){ open.href = active.profileUrl; open.style.pointerEvents='auto'; open.style.opacity='1'; }
-    else { open.href = '#'; open.style.pointerEvents='none'; open.style.opacity='.6'; }
-
-    if (!active?.profileUrl){
-      vp.innerHTML = `
-        <div class="welcome">
-          <div class="wel-card">
-            <h2>Welcome to the Kingdom Rescue Foster Portal</h2>
-            <p>Browse the animals below. Tap any profile to view their one-page info sheet. Ask a volunteer if you have questions or want to apply to foster.</p>
-            <div class="wel-grid">
-              <div class="wel-item">1. Scroll the thumbnail rail and tap a pet.</div>
-              <div class="wel-item">2. Pinch-zoom images or open PDFs in a new tab.</div>
-              <div class="wel-item">3. Use the arrows to navigate.</div>
-            </div>
-          </div>
-        </div>`;
-      return;
+      if (!fbReady) return;
+      try{
+        const snap = await db.collection('adoption_status').get();
+        snap.forEach(doc=>{ if (doc.data()?.adopted === true) adoptedSet.add(doc.id); });
+      }catch(err){
+        console.warn('Adoption status load error:', err);
+        adoptedSet = new Set();
+      }
     }
 
-    vp.innerHTML = isPdf(active.profileUrl)
-      ? `<iframe title="${active.name||'Profile'}" src="${active.profileUrl}" loading="lazy"></iframe>`
-      : `<img alt="${active.name||'Profile'}" src="${active.profileUrl}" loading="lazy">`;
-  }
-
-  function thumbNode(a){
-    const btn = document.createElement('button');
-    btn.className = 'thumb'; btn.dataset.id = a.id;
-    btn.addEventListener('click',()=>setActive(a.id));
-    const thumbSrc = a.thumb || a.profileUrl;
-    btn.innerHTML = `
-      <img src="${thumbSrc}" alt="${a.name||'Profile'}" loading="lazy">
-      <div>
-        <div class="name">${a.name||'Profile'}</div>
-        ${a.species?`<div class="meta">${a.species}</div>`:''}
-        ${a.id==='welcome'?'<div class="badge">Start here</div>':''}
-      </div>`;
-    return btn;
-  }
-  function buildThumbs(){
-    const v = document.getElementById('thumbsVertical');
-    const h = document.getElementById('thumbsHorizontal');
-    if(v) v.innerHTML = ''; if(h) h.innerHTML = '';
-    visibleAnimals().forEach(a=>{
-      const V = thumbNode(a), H = thumbNode(a);
-      if(a.id===activeId){V.classList.add('active');H.classList.add('active');}
-      v && v.appendChild(V); h && h.appendChild(H);
-    });
-  }
-
-  /* Search */
-  function attachSearch(inputId,listId){
-    const input = document.getElementById(inputId);
-    const list  = document.getElementById(listId);
-    if(!input || !list) return;
-    input.addEventListener('input',()=>{
-      const s = input.value.trim().toLowerCase();
-      if(!s){list.classList.add('hidden'); list.innerHTML=''; return;}
-      const res = visibleAnimals()
-        .filter(a=>a.id!=='welcome' && a.id!=='adoption_info')
-        .filter(a=>((a.name||'').toLowerCase().includes(s) || (a.species||'').toLowerCase().includes(s)))
-        .slice(0,8);
-      list.innerHTML = res.length
-        ? res.map(r=>`<button class="search-item" data-id="${r.id}"><strong>${r.name}</strong><small>${r.species||''}</small></button>`).join('')
-        : `<div class="search-item" disabled>No matches.</div>`;
-      list.classList.remove('hidden');
-    });
-    list.addEventListener('click',(e)=>{
-      const b = e.target.closest('[data-id]'); if(!b) return;
-      setActive(b.dataset.id); list.classList.add('hidden'); input.value='';
-    });
-    document.addEventListener('click',(e)=>{ if(!list.contains(e.target) && e.target!==input) list.classList.add('hidden'); });
-  }
-
-  /* Keyboard */
-  function attachKeys(){
-    window.addEventListener('keydown',(e)=>{
-      if(['ArrowLeft','ArrowUp','a','w'].includes(e.key)) goPrev();
-      if(['ArrowRight','ArrowDown','d','s'].includes(e.key)) goNext();
-    });
-  }
-
-  /* Admin panel (only if Firebase configured & ?admin=1) */
-  const isAdminMode = new URL(location.href).searchParams.get('admin') === '1';
-  function mountAdminPanel(){
-    if (!fbReady) return;
-    const wrap = document.createElement('div');
-    wrap.innerHTML = `
-      <style>
-        .admin-panel{position:fixed;right:16px;bottom:calc(var(--railH,72px) + 16px);
-          background:#0f1014f0;border:1px solid var(--border);border-radius:16px;
-          padding:12px;width:min(360px,92vw);z-index:2000}
-        .admin-panel h3{margin:0 0 8px;font-size:14px;color:#e5e7eb}
-        .admin-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border)}
-        .admin-list{max-height:40vh;overflow:auto}
-        .admin-login{display:flex;gap:6px;margin:8px 0}
-        .admin-login input{flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:#121316c0;color:var(--text)}
-        .admin-btn{border:1px solid var(--border);background:#0f1012b3;color:var(--text);border-radius:10px;padding:8px 10px;cursor:pointer}
-        .admin-badge{font-size:11px;padding:2px 6px;border:1px solid var(--border);border-radius:999px;color:#e5e7eb}
-        .hidden{display:none}
-      </style>
-      <div class="admin-panel">
-        <h3>Admin · Adoption Toggle <span id="adminStatus" class="admin-badge">Signed out</span></h3>
-        <div class="admin-login" id="loginBox">
-          <input id="adminEmail" type="email" placeholder="Email">
-          <input id="adminPass" type="password" placeholder="Password">
-          <button class="admin-btn" id="adminSignIn">Sign in</button>
-        </div>
-        <div class="admin-login hidden" id="logoutBox">
-          <small id="whoami"></small>
-          <button class="admin-btn" id="adminSignOut">Sign out</button>
-        </div>
-        <div class="admin-list" id="adminList"></div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="admin-btn" id="refreshAdopted">Refresh</button>
-        </div>
-      </div>`;
-    document.body.appendChild(wrap);
-
-    const adminStatus = document.getElementById('adminStatus');
-    const loginBox = document.getElementById('loginBox');
-    const logoutBox = document.getElementById('logoutBox');
-    const whoami = document.getElementById('whoami');
-    const adminList = document.getElementById('adminList');
-
-    function renderAdminList(){
-      const rows = ANIMALS
-        .filter(a => !isSystem(a.id))
-        .map(a=>{
-          const checked = adoptedSet.has(a.id) ? 'checked' : '';
-          return `<div class="admin-row">
-            <div style="display:flex;align-items:center;gap:8px">
-              <img src="${a.thumb || a.profileUrl}" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
-              <div><div style="font-weight:600">${a.name}</div><small>${a.species||''}</small></div>
-            </div>
-            <label style="display:flex;align-items:center;gap:6px">
-              <small>Adopted</small>
-              <input type="checkbox" data-id="${a.id}" ${checked}/>
-            </label>
-          </div>`;
-        }).join('');
-      adminList.innerHTML = rows || '<small>No cats.</small>';
-
-      adminList.querySelectorAll('input[type=checkbox]').forEach(cb=>{
-        cb.addEventListener('change', async (e)=>{
-          const id = e.target.dataset.id;
-          const adopted = e.target.checked;
-          try{
-            await db.collection('adoption_status').doc(id).set({ adopted }, { merge:true });
-            if (adopted) adoptedSet.add(id); else adoptedSet.delete(id);
-            buildThumbs();
-            const ids = order(); if(!ids.includes(activeId)) activeId = ids[0];
-            render();
-          }catch(err){
-            alert('Update failed. Are you signed in and listed as admin?');
-            e.target.checked = !adopted;
-          }
-        });
+    function startRealtime(){
+      if (!fbReady) return;
+      if (unsubStatus) unsubStatus(); // reset if re-called
+      unsubStatus = db.collection('adoption_status').onSnapshot(snap=>{
+        const next = new Set();
+        snap.forEach(doc=>{ if (doc.data()?.adopted === true) next.add(doc.id); });
+        const before = JSON.stringify([...adoptedSet].sort());
+        const after  = JSON.stringify([...next].sort());
+        adoptedSet = next;
+        if (before !== after){
+          // Rebuild visible lists and keep a valid active card
+          buildThumbs();
+          const ids = order();
+          if(!ids.includes(activeId)) activeId = ids[0];
+          render();
+          // Notify any admin panel instance to refresh its toggles
+          window.dispatchEvent(new CustomEvent('adopted-updated'));
+        }
+      }, err=>{
+        console.warn('Realtime listener error:', err);
       });
     }
 
-    document.getElementById('refreshAdopted').addEventListener('click', async ()=>{
-      await loadAdopted(); renderAdminList(); buildThumbs(); render();
-    });
+    // These panels are never hidden even if flagged by mistake
+    function isSystem(id){ return id === 'welcome' || id === 'adoption_info'; }
 
-    document.getElementById('adminSignIn').addEventListener('click', async ()=>{
-      const email = (document.getElementById('adminEmail').value||'').trim();
-      const password = document.getElementById('adminPass').value||'';
-      try{ await auth.signInWithEmailAndPassword(email, password); }catch(err){ alert('Sign-in failed'); }
-    });
-    document.getElementById('adminSignOut').addEventListener('click', async ()=>{ await auth.signOut(); });
+    function visibleAnimals(){
+      const list = ANIMALS.filter(a => isSystem(a.id) || !adoptedSet.has(a.id));
+      return list.length ? list : ANIMALS.slice();  // hard fallback
+    }
 
-    auth.onAuthStateChanged(user=>{
-      const authed = !!user;
-      adminStatus.textContent = authed ? 'Signed in' : 'Signed out';
-      loginBox.classList.toggle('hidden', authed);
-      logoutBox.classList.toggle('hidden', !authed);
-      whoami.textContent = authed ? (user.email||'') : '';
+    /* ======================
+       4) UI HELPERS
+       ====================== */
+    const qs = new URL(location.href);
+    let activeId = qs.searchParams.get('id') || ANIMALS[0].id;
+
+    const order = () => visibleAnimals().map(a=>a.id);
+    function goPrev(){ const o=order(); const i=o.indexOf(activeId); setActive(o[(i-1+o.length)%o.length]); }
+    function goNext(){ const o=order(); const i=o.indexOf(activeId); setActive(o[(i+1)%o.length]); }
+
+    function setActive(id){
+      activeId = id;
+      const u = new URL(location.href); u.searchParams.set('id', id); history.replaceState({}, '', u);
+      render();
+      document.querySelectorAll('.thumb').forEach(el=>el.classList.toggle('active', el.dataset.id===id));
+    }
+
+    const isPdf = url => (url||'').toLowerCase().endsWith('.pdf');
+
+    function render(){
+      const list = visibleAnimals();
+      const active = list.find(a=>a.id===activeId) || list[0] || ANIMALS[0];
+
+      const title = document.getElementById('profileTitle');
+      const meta  = document.getElementById('profileMeta');
+      const open  = document.getElementById('openExternal');
+      const vp    = document.getElementById('viewport');
+
+      title.textContent = active?.name || 'Profile';
+      meta.textContent  = active?.species || '';
+
+      if (active?.profileUrl){ open.href = active.profileUrl; open.style.pointerEvents='auto'; open.style.opacity='1'; }
+      else { open.href = '#'; open.style.pointerEvents='none'; open.style.opacity='.6'; }
+
+      if (!active?.profileUrl){
+        vp.innerHTML = `
+          <div class="welcome">
+            <div class="wel-card">
+              <h2>Welcome to the Kingdom Rescue Foster Portal</h2>
+              <p>Browse the animals below. Tap any profile to view their one-page info sheet. Ask a volunteer if you have questions or want to apply to foster.</p>
+              <div class="wel-grid">
+                <div class="wel-item">1. Scroll the thumbnail rail and tap a pet.</div>
+                <div class="wel-item">2. The profile opens here. Pinch-zoom images or use the <em>Open in new tab</em> button for PDFs.</div>
+                <div class="wel-item">3. Use the thumbnails to navigate, or arrow keys on desktop.</div>
+              </div>
+            </div>
+          </div>`;
+        return;
+      }
+
+      vp.innerHTML = isPdf(active.profileUrl)
+        ? `<iframe title="${active.name||'Profile'}" src="${active.profileUrl}" loading="lazy"></iframe>`
+        : `<img alt="${active.name||'Profile'}" src="${active.profileUrl}" loading="lazy">`;
+    }
+
+    function thumbNode(a){
+      const btn = document.createElement('button');
+      btn.className = 'thumb'; btn.dataset.id = a.id;
+      btn.addEventListener('click',()=>setActive(a.id));
+      const thumbSrc = a.thumb || a.profileUrl;
+      btn.innerHTML = `
+        <img src="${thumbSrc}" alt="${a.name||'Profile'}" loading="lazy">
+        <div>
+          <div class="name">${a.name||'Profile'}</div>
+          ${a.species?`<div class="meta">${a.species}</div>`:''}
+          ${a.id==='welcome'?'<div class="badge">Start here</div>':''}
+        </div>`;
+      return btn;
+    }
+
+    function buildThumbs(){
+      const v = document.getElementById('thumbsVertical');
+      const h = document.getElementById('thumbsHorizontal');
+      if(v) v.innerHTML=''; if(h) h.innerHTML='';
+      visibleAnimals().forEach(a=>{
+        const V = thumbNode(a), H = thumbNode(a);
+        if(a.id===activeId){V.classList.add('active');H.classList.add('active');}
+        v && v.appendChild(V); h && h.appendChild(H);
+      });
+    }
+
+    // Search
+    function attachSearch(inputId,listId){
+      const input = document.getElementById(inputId);
+      const list  = document.getElementById(listId);
+      if(!input || !list) return;
+      input.addEventListener('input',()=>{
+        const s = input.value.trim().toLowerCase();
+        if(!s){list.classList.add('hidden'); list.innerHTML=''; return;}
+        const res = visibleAnimals()
+          .filter(a=>a.id!=='welcome' && a.id!=='adoption_info')
+          .filter(a=>((a.name||'').toLowerCase().includes(s) || (a.species||'').toLowerCase().includes(s)))
+          .slice(0,8);
+        list.innerHTML = res.length
+          ? res.map(r=>`<button class="search-item" data-id="${r.id}"><strong>${r.name}</strong><small>${r.species||''}</small></button>`).join('')
+          : `<div class="search-item" disabled>No matches.</div>`;
+        list.classList.remove('hidden');
+      });
+      list.addEventListener('click',(e)=>{
+        const b = e.target.closest('[data-id]'); if(!b) return;
+        setActive(b.dataset.id); list.classList.add('hidden'); input.value='';
+      });
+      document.addEventListener('click',(e)=>{ if(!list.contains(e.target) && e.target!==input) list.classList.add('hidden'); });
+    }
+
+    // Keyboard
+    function attachKeys(){
+      window.addEventListener('keydown',(e)=>{
+        if(['ArrowLeft','ArrowUp','a','w'].includes(e.key)) goPrev();
+        if(['ArrowRight','ArrowDown','d','s'].includes(e.key)) goNext();
+      });
+    }
+
+    /* ======================
+       5) ADMIN PANEL (?admin=1)
+       ====================== */
+    const isAdminMode = new URL(location.href).searchParams.get('admin') === '1';
+
+    function mountAdminPanel(){
+      if (!fbReady) return; // only shown if Firebase is configured
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <style>
+          .admin-panel{
+            position:fixed; right:16px; left:16px;
+            bottom:calc(var(--railH,72px) + 16px);
+            background:#0f1014f0; border:1px solid var(--border); border-radius:16px;
+            padding:12px; width:auto; max-width:420px; z-index:2000; box-shadow:var(--shadow);
+          }
+          .admin-panel h3{margin:0 0 8px;font-size:14px;color:#e5e7eb}
+          .admin-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border)}
+          .admin-list{max-height:40vh;overflow:auto}
+          .admin-login{display:grid;grid-template-columns:1fr auto;gap:6px;margin:8px 0}
+          .admin-login input{min-width:0;width:100%;padding:8px;border-radius:10px;border:1px solid var(--border);background:#121316c0;color:var(--text)}
+          .admin-btn{border:1px solid var(--border);background:#0f1012b3;color:var(--text);border-radius:10px;padding:8px 10px;cursor:pointer}
+          .admin-badge{font-size:11px;padding:2px 6px;border:1px solid var(--border);border-radius:999px;color:#e5e7eb}
+          .hidden{display:none}
+          @media (max-width:480px){ .admin-login{grid-template-columns:1fr}.admin-btn{width:100%} }
+        </style>
+        <div class="admin-panel">
+          <h3>Admin · Adoption Toggle <span id="adminStatus" class="admin-badge">Signed out</span></h3>
+          <div class="admin-login" id="loginBox">
+            <input id="adminEmail" type="email" placeholder="Email">
+            <input id="adminPass" type="password" placeholder="Password">
+            <button class="admin-btn" id="adminSignIn">Sign in</button>
+          </div>
+          <div class="admin-login hidden" id="logoutBox">
+            <small id="whoami"></small>
+            <button class="admin-btn" id="adminSignOut">Sign out</button>
+          </div>
+          <div class="admin-list" id="adminList"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="admin-btn" id="refreshAdopted">Refresh</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(wrap);
+
+      // UX tweaks
+      const emailEl = document.getElementById('adminEmail');
+      const passEl  = document.getElementById('adminPass');
+      if (emailEl){ emailEl.setAttribute('inputmode','email'); emailEl.style.textOverflow='ellipsis'; }
+      if (passEl){ passEl.addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('adminSignIn')?.click(); }); }
+
+      const adminStatus = document.getElementById('adminStatus');
+      const loginBox = document.getElementById('loginBox');
+      const logoutBox = document.getElementById('logoutBox');
+      const whoami = document.getElementById('whoami');
+      const adminList = document.getElementById('adminList');
+
+      function renderAdminList(){
+        const rows = ANIMALS
+          .filter(a => !isSystem(a.id))
+          .map(a=>{
+            const checked = adoptedSet.has(a.id) ? 'checked' : '';
+            return `<div class="admin-row">
+              <div style="display:flex;align-items:center;gap:8px">
+                <img src="${a.thumb || a.profileUrl}" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                <div><div style="font-weight:600">${a.name}</div><small>${a.species||''}</small></div>
+              </div>
+              <label style="display:flex;align-items:center;gap:6px">
+                <small>Adopted</small>
+                <input type="checkbox" data-id="${a.id}" ${checked}/>
+              </label>
+            </div>`;
+          }).join('');
+        adminList.innerHTML = rows || '<small>No cats.</small>';
+
+        adminList.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+          cb.addEventListener('change', async (e)=>{
+            const id = e.target.dataset.id;
+            const adopted = e.target.checked;
+            try{
+              await db.collection('adoption_status').doc(id).set({ adopted }, { merge:true });
+              // realtime listener will update UI; keep local in sync for snappy feel
+              if (adopted) adoptedSet.add(id); else adoptedSet.delete(id);
+              buildThumbs(); const ids = order(); if(!ids.includes(activeId)) activeId = ids[0]; render();
+            }catch(err){
+              alert('Update failed. Are you signed in and listed as admin?');
+              e.target.checked = !adopted;
+            }
+          });
+        });
+      }
+
+      // Buttons
+      document.getElementById('refreshAdopted').addEventListener('click', async ()=>{
+        await loadAdoptedOnce(); renderAdminList(); buildThumbs(); render();
+      });
+      document.getElementById('adminSignIn').addEventListener('click', async ()=>{
+        const email = (document.getElementById('adminEmail').value||'').trim();
+        const password = document.getElementById('adminPass').value||'';
+        try{ await auth.signInWithEmailAndPassword(email, password); }catch(err){ alert('Sign-in failed'); }
+      });
+      document.getElementById('adminSignOut').addEventListener('click', async ()=>{ await auth.signOut(); });
+
+      // Auth state
+      auth.onAuthStateChanged(user=>{
+        const authed = !!user;
+        adminStatus.textContent = authed ? 'Signed in' : 'Signed out';
+        loginBox.classList.toggle('hidden', authed);
+        logoutBox.classList.toggle('hidden', !authed);
+        whoami.textContent = authed ? (user.email||'') : '';
+        renderAdminList();
+      });
+
+      // Live reflect changes in panel too
+      window.addEventListener('adopted-updated', renderAdminList);
+
       renderAdminList();
-    });
+    }
 
-    renderAdminList();
-  }
+    /* ======================
+       6) BOOT
+       ====================== */
+    async function boot(){
+      await loadAdoptedOnce();   // safe even if Firebase isn't configured
+      buildThumbs();
+      attachSearch('search','searchList');
+      attachSearch('searchM','searchListM');
+      attachKeys();
 
-  /* 6) Boot */
-  async function boot(){
-    await loadAdopted();
-    buildThumbs();
-    attachSearch('search','searchList');
-    attachSearch('searchM','searchListM');
-    attachKeys();
+      // Wire arrows
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const viewPrev = document.getElementById('viewPrev');
+      const viewNext = document.getElementById('viewNext');
+      [btnPrev,viewPrev].forEach(b=>b && b.addEventListener('click',goPrev));
+      [btnNext,viewNext].forEach(b=>b && b.addEventListener('click',goNext));
+      [btnPrev,btnNext,viewPrev,viewNext].forEach(btn=>{
+        if(!btn) return;
+        btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); (btn===btnPrev||btn===viewPrev)?goPrev():goNext(); }});
+      });
 
-    // arrows
-    const btnPrev = document.getElementById('btnPrev');
-    const btnNext = document.getElementById('btnNext');
-    const viewPrev = document.getElementById('viewPrev');
-    const viewNext = document.getElementById('viewNext');
-    [btnPrev,viewPrev].forEach(b=>b && b.addEventListener('click',goPrev));
-    [btnNext,viewNext].forEach(b=>b && b.addEventListener('click',goNext));
-    [btnPrev,btnNext,viewPrev,viewNext].forEach(btn=>{
-      if(!btn) return;
-      btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); (btn===btnPrev||btn===viewPrev)?goPrev():goNext(); }});
-    });
+      const ids = order();
+      if(!ids.includes(activeId)) activeId = ids[0];
+      render();
 
-    const ids = order();
-    if(!ids.includes(activeId)) activeId = ids[0];
-    render();
-
-    if (isAdminMode) mountAdminPanel();
-  }
-
-  boot();
-
-  }); // end window.load
+      // Admin panel & realtime
+      if (new URL(location.href).searchParams.get('admin') === '1') mountAdminPanel();
+      startRealtime(); // always start realtime (no-op if no Firebase)
+    }
+    boot();
   </script>
 </body>
 </html>
