@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kingdom Rescue – Foster Portal</title>
   <style>
     /* —— Theme —— */
@@ -15,12 +15,14 @@
       --accent:#10b981;
       --accent-2:#14b8a6;
       --shadow:0 10px 30px rgba(0,0,0,.45);
-      --railH:78px; /* ↑ a bit taller for easier tapping */
+      --railH:72px;           /* mobile bottom rail height */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;background:var(--bg);color:var(--text);
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
       font:14px/1.4 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
       -webkit-font-smoothing:antialiased
     }
@@ -35,28 +37,33 @@
 
     /* Sidebar (desktop) */
     .sidebar{
-      display:none;width:288px;flex:0 0 288px;border-right:1px solid var(--border);
+      display:none;width:288px;flex:0 0 288px;
+      border-right:1px solid var(--border);
       background:#0b0c0dcc;backdrop-filter:saturate(120%) blur(8px)
     }
     @media(min-width:768px){.sidebar{display:flex;flex-direction:column}}
 
     /* Header */
     .header{
-      padding:12px 16px 8px;
+      padding:16px 16px 8px;
       border-bottom:1px solid var(--border);
       background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)
     }
-    .brand{display:flex;align-items:center;gap:10px}
+    .brand{display:flex;align-items:center;gap:12px}
+
+    /* 🔁 changed: logo is now an <img> */
     .logo{
       width:40px;height:40px;border-radius:10px;
-      object-fit:contain;object-position:center;display:block;
-      background:#0c0c0d;padding:2px
+      object-fit:contain; object-position:center;
+      display:block; background:#0c0c0d; /* subtle pad behind transparent PNGs/JPEGs */
+      padding:2px;                      /* tiny inset so it doesn't touch the edges */
     }
+
     .title{font-weight:700;letter-spacing:-.01em}
     .subtitle{color:var(--muted);font-size:12px;margin-top:2px}
 
     /* Search */
-    .search{position:relative;padding:10px 16px}
+    .search{position:relative;padding:12px 16px}
     .search input{
       width:100%;padding:10px 12px;border-radius:12px;
       border:1px solid var(--border);background:#121316c0;color:var(--text);outline:none
@@ -67,10 +74,6 @@
       background:#0f1014f2;border:1px solid var(--border);border-radius:12px;
       box-shadow:var(--shadow);max-height:280px;overflow:auto;z-index:50
     }
-    /* Mobile: dropdown uses more of the screen but stays inside viewport */
-    @media(max-width:767px){
-      .search-list{top:calc(100% + 8px);left:16px;right:16px;max-height:55vh}
-    }
     .search-item{
       display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;
       background:transparent;border:0;color:var(--text)
@@ -80,31 +83,28 @@
 
     /* Thumbnails */
     .thumbs-vertical{flex:1;overflow:auto;padding:0 12px 12px}
-    .thumbs-horizontal{
-      display:flex;gap:8px;overflow:auto;padding:10px 10px;height:var(--railH);
-      align-items:center;
-      /* subtle edge fade to hint scroll */
-      -webkit-mask-image:linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
-              mask-image:linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
-    }
+    .thumbs-horizontal{display:flex;gap:8px;overflow:auto;padding:8px 8px}
     .thumb{
       display:flex;align-items:center;gap:10px;
       border:1px solid var(--border);background:#0f1012b3;border-radius:16px;
-      padding:8px 10px;transition:.18s ease;position:relative;
-      -webkit-appearance:none;appearance:none;margin:0;height:76px;overflow:hidden;
-      color:var(--text)
+      padding:8px;transition:.18s ease;position:relative;
+      -webkit-appearance:none;appearance:none;margin:0;width:100%;height:80px;overflow:hidden;
+      color:var(--text); /* ensure text inside button is the UI text color */
     }
     .thumb:hover{background:#0f1012cc}
     .thumb.active{outline:3px solid color-mix(in oklab,var(--accent) 55%, transparent)}
-    .thumb img{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:0 0 64px;background:#111}
+    .thumb img{
+      width:64px;height:64px;object-fit:cover;border-radius:12px;flex:0 0 64px;background:#111
+    }
     .thumb > div{display:flex;flex-direction:column;justify-content:center;min-width:0}
-    .thumb .name{font-weight:600;font-size:14px;color:var(--text)}
+    .thumb .name{
+      font-weight:600;font-size:14px;
+      color:var(--text); /* explicitly set name color */
+    }
     .thumb .meta{color:var(--muted);font-size:12px}
     .badge{font-size:10px;color:#7bfcc7}
-    .thumb .name,.thumb .meta,.thumb .badge{line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
-    @media(max-width:420px){
-      .thumb{height:72px}
-      .thumb img{width:56px;height:56px}
+    .thumb .name,.thumb .meta,.thumb .badge{
+      line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px
     }
 
     /* Main */
@@ -113,14 +113,14 @@
     @media(min-width:768px){.topbar.mobile{display:none}}
 
     .profilebar{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:8px 12px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 16px;border-bottom:1px solid var(--border);
       background:#0f1012a0;backdrop-filter:blur(8px)
     }
     .label{color:var(--muted);text-transform:uppercase;font-size:12px}
     .openbtn{border:1px solid var(--border);padding:8px 10px;border-radius:12px;background:transparent;color:var(--text)}
     .openbtn:hover{background:rgba(255,255,255,.06)}
-    .profile-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+    .profile-actions{display:flex;align-items:center;gap:8px}
     .profile-btn{
       width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
       border:1px solid var(--border);border-radius:10px;background:#0f1012b3;color:var(--text);cursor:pointer;outline:none;
@@ -128,47 +128,47 @@
     .profile-btn:hover{background:#0f1012cc}
     .profile-btn svg{width:22px;height:22px}
     .fee{
-      margin-left:4px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;
-      background:#0b0c0fcc;color:#e5e7eb;font-weight:700;letter-spacing:.2px;white-space:nowrap
+      margin-left:8px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;
+      background:#0b0c0fcc;color:#e5e7eb;font-weight:700;letter-spacing:.2px
     }
-
-    /* Tiny phones: shrink controls a touch and make "Open in new tab" compact */
-    @media (max-width:380px){
-      .logo{width:34px;height:34px}
+    @media (max-width: 359px){
       .profile-btn{width:32px;height:32px}
       .profile-btn svg{width:18px;height:18px}
-      .openbtn{padding:6px 8px;font-size:12px}
       .fee{padding:5px 8px;font-size:12px}
     }
 
     .viewport{position:absolute;left:0;right:0;top:64px;bottom:0}
     @media(min-width:768px){.viewport{top:68px}}
-    /* Respect bottom rail + iOS safe area */
-    @media(max-width:767px){
-      .viewport{bottom:calc(var(--railH) + max(env(safe-area-inset-bottom,0px), 0px))}
-    }
+    @media(max-width:767px){.viewport{bottom:calc(var(--railH) + env(safe-area-inset-bottom,0px))}}
     .viewport iframe,.viewport img{width:100%;height:100%;display:block;position:relative;z-index:10}
     .viewport img{object-fit:contain;background:black}
 
     /* Under-viewport arrows + note */
-    .view-actions{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:auto;z-index:20;bottom:8px}
+    .view-actions{
+      position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;
+      gap:10px;pointer-events:auto;z-index:20;bottom:8px
+    }
     @media(max-width:767px){.view-actions{bottom:calc(var(--railH) + 8px)}}
-    .note{position:absolute;left:0;right:0;bottom:calc(var(--railH) + 36px);text-align:center;color:var(--muted);font-size:12px}
+    .note{
+      position:absolute;left:0;right:0;bottom:calc(var(--railH) + 36px);
+      text-align:center;color:var(--muted);font-size:12px
+    }
     @media(min-width:768px){.note{bottom:18px}}
 
     /* Bottom rail (mobile) */
     .bottomrail{
       border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);
-      position:absolute;left:0;right:0;bottom:0;height:calc(var(--railH) + env(safe-area-inset-bottom,0px));z-index:60;
-      padding-bottom:env(safe-area-inset-bottom,0px);
+      position:absolute;left:0;right:0;bottom:0;height:var(--railH);z-index:60
     }
     @media(min-width:768px){.bottomrail{display:none}}
 
     /* Welcome fallback */
     .welcome{position:absolute;inset:0;display:grid;place-items:center;padding:24px}
     .wel-card{
-      max-width:900px;width:min(100%,900px);border:1px solid var(--border);border-radius:24px;
-      background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(20,184,166,.08));padding:28px;box-shadow:var(--shadow)
+      max-width:900px;width:min(100%,900px);
+      border:1px solid var(--border);border-radius:24px;
+      background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(20,184,166,.08));
+      padding:28px;box-shadow:var(--shadow)
     }
     .wel-card h2{margin:0 0 8px;font-size:22px}
     .wel-card p{margin:0 0 14px;color:#e5e7eb}
@@ -183,6 +183,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="header">
         <div class="brand">
+          <!-- 🔁 was a green square; now your logo image -->
           <img src="assets/krlogo.jpeg" alt="Kingdom Rescue logo" class="logo" />
           <div>
             <div class="title">Kingdom Rescue</div>
@@ -203,6 +204,7 @@
       <div class="topbar mobile">
         <div class="header">
           <div class="brand">
+            <!-- 🔁 mobile header logo too -->
             <img src="assets/krlogo.jpeg" alt="Kingdom Rescue logo" class="logo" />
             <div>
               <div class="title">Kingdom Rescue</div>
@@ -290,6 +292,7 @@
     let fbReady = false, auth = null, db = null;
 
     try{
+      // 🔐 Your Firebase config
       const firebaseConfig = {
         apiKey: "AIzaSyDKAfB4KVwMS3aXJxrQgqy6GiX0GalzIlw",
         authDomain: "kingdomrescue-4fa02.firebaseapp.com",
@@ -329,7 +332,7 @@
 
     function startRealtime(){
       if (!fbReady) return;
-      if (unsubStatus) unsubStatus();
+      if (unsubStatus) unsubStatus(); // reset if re-called
       unsubStatus = db.collection('adoption_status').onSnapshot(snap=>{
         const next = new Set();
         snap.forEach(doc=>{ if (doc.data()?.adopted === true) next.add(doc.id); });
@@ -343,13 +346,17 @@
           render();
           window.dispatchEvent(new CustomEvent('adopted-updated'));
         }
-      }, err=>{ console.warn('Realtime listener error:', err); });
+      }, err=>{
+        console.warn('Realtime listener error:', err);
+      });
     }
 
+    // These panels are never hidden even if flagged by mistake
     function isSystem(id){ return id === 'welcome' || id === 'adoption_info'; }
+
     function visibleAnimals(){
       const list = ANIMALS.filter(a => isSystem(a.id) || !adoptedSet.has(a.id));
-      return list.length ? list : ANIMALS.slice();
+      return list.length ? list : ANIMALS.slice();  // hard fallback
     }
 
     /* ======================
@@ -412,6 +419,8 @@
       btn.className = 'thumb'; btn.dataset.id = a.id;
       btn.addEventListener('click',()=>setActive(a.id));
       const thumbSrc = a.thumb || a.profileUrl;
+
+      // Show meta ONLY for system items (welcome/adoption_info). For cat profiles, show name only.
       const showMeta = isSystem(a.id) && a.species;
 
       btn.innerHTML = `
@@ -473,15 +482,15 @@
     const isAdminMode = new URL(location.href).searchParams.get('admin') === '1';
 
     function mountAdminPanel(){
-      if (!fbReady) return;
+      if (!fbReady) return; // only shown if Firebase is configured
       const wrap = document.createElement('div');
       wrap.innerHTML = `
         <style>
           .admin-panel{
             position:fixed; right:16px; left:16px;
-            bottom:calc(var(--railH,78px) + 16px);
+            bottom:calc(var(--railH,72px) + 16px);
             background:#0f1014f0; border:1px solid var(--border); border-radius:16px;
-            padding:12px; width:auto; max-width:460px; z-index:2000; box-shadow:var(--shadow);
+            padding:12px; width:auto; max-width:420px; z-index:2000; box-shadow:var(--shadow);
           }
           .admin-panel h3{margin:0 0 8px;font-size:14px;color:#e5e7eb}
           .admin-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border)}
@@ -491,11 +500,7 @@
           .admin-btn{border:1px solid var(--border);background:#0f1012b3;color:var(--text);border-radius:10px;padding:8px 10px;cursor:pointer}
           .admin-badge{font-size:11px;padding:2px 6px;border:1px solid var(--border);border-radius:999px;color:#e5e7eb}
           .hidden{display:none}
-          @media (max-width:480px){
-            .admin-panel{left:8px; right:8px; max-width:none}
-            .admin-login{grid-template-columns:1fr}
-            .admin-btn{width:100%}
-          }
+          @media (max-width:480px){ .admin-login{grid-template-columns:1fr}.admin-btn{width:100%} }
         </style>
         <div class="admin-panel">
           <h3>Admin · Adoption Toggle <span id="adminStatus" class="admin-badge">Signed out</span></h3>
@@ -516,6 +521,7 @@
       `;
       document.body.appendChild(wrap);
 
+      // UX tweaks
       const emailEl = document.getElementById('adminEmail');
       const passEl  = document.getElementById('adminPass');
       if (emailEl){ emailEl.setAttribute('inputmode','email'); emailEl.style.textOverflow='ellipsis'; }
@@ -551,6 +557,7 @@
             const adopted = e.target.checked;
             try{
               await db.collection('adoption_status').doc(id).set({ adopted }, { merge:true });
+              // realtime listener will update UI; keep local in sync for snappy feel
               if (adopted) adoptedSet.add(id); else adoptedSet.delete(id);
               buildThumbs(); const ids = order(); if(!ids.includes(activeId)) activeId = ids[0]; render();
             }catch(err){
@@ -561,6 +568,7 @@
         });
       }
 
+      // Buttons
       document.getElementById('refreshAdopted').addEventListener('click', async ()=>{
         await loadAdoptedOnce(); renderAdminList(); buildThumbs(); render();
       });
@@ -571,6 +579,7 @@
       });
       document.getElementById('adminSignOut').addEventListener('click', async ()=>{ await auth.signOut(); });
 
+      // Auth state
       auth.onAuthStateChanged(user=>{
         const authed = !!user;
         adminStatus.textContent = authed ? 'Signed in' : 'Signed out';
@@ -580,7 +589,9 @@
         renderAdminList();
       });
 
+      // Live reflect changes in panel too
       window.addEventListener('adopted-updated', renderAdminList);
+
       renderAdminList();
     }
 
@@ -588,12 +599,13 @@
        6) BOOT
        ====================== */
     async function boot(){
-      await loadAdoptedOnce();
+      await loadAdoptedOnce();   // safe even if Firebase isn't configured
       buildThumbs();
       attachSearch('search','searchList');
       attachSearch('searchM','searchListM');
       attachKeys();
 
+      // Wire arrows
       const btnPrev = document.getElementById('btnPrev');
       const btnNext = document.getElementById('btnNext');
       const viewPrev = document.getElementById('viewPrev');
@@ -609,13 +621,15 @@
       if(!ids.includes(activeId)) activeId = ids[0];
       render();
 
+      // Admin panel & realtime
       if (new URL(location.href).searchParams.get('admin') === '1') mountAdminPanel();
-      startRealtime();
+      startRealtime(); // always start realtime (no-op if no Firebase)
     }
     boot();
 
     } /* ===== end startApp ===== */
 
+    // Ensure Firebase SDKs (deferred) are loaded before running app code
     if (window.firebase) startApp();
     else window.addEventListener('load', startApp);
   </script>
