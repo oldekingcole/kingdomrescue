@@ -12,7 +12,9 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;-webkit-font-smoothing:antialiased}
+    body{margin:0;background:var(--bg);color:var(--text);
+         font:14px/1.4 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+         -webkit-font-smoothing:antialiased}
     a{color:inherit;text-decoration:none}
     .hidden{display:none}
     .no-scrollbar{scrollbar-width:none}
@@ -90,15 +92,6 @@
     /* Bottom rail (mobile) pinned */
     .bottomrail{position:absolute;left:0;right:0;bottom:0;height:var(--railH);border-top:1px solid var(--border);background:#0f1012a6;backdrop-filter:blur(8px);z-index:60}
     @media(min-width:768px){.bottomrail{display:none}}
-
-    /* Welcome fallback (if no image) */
-    .welcome{position:absolute;inset:0;display:grid;place-items:center;padding:24px}
-    .wel-card{max-width:900px;width:min(100%,900px);border:1px solid var(--border);border-radius:24px;background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(20,184,166,.08));padding:28px;box-shadow:var(--shadow)}
-    .wel-card h2{margin:0 0 8px;font-size:22px}
-    .wel-card p{margin:0 0 14px;color:#e5e7eb}
-    .wel-grid{display:grid;grid-template-columns:1fr;gap:10px}
-    .wel-item{padding:10px 12px;border-radius:14px;background:#0b0c0f80;border:1px solid var(--border)}
-    @media(min-width:640px){.wel-grid{grid-template-columns:repeat(3,1fr)}}
   </style>
 </head>
 <body>
@@ -201,9 +194,9 @@
     const auth = firebase.auth();
     const db   = firebase.firestore();
 
-    /* ==== Data (thumbnails optional; falls back to profileUrl) ==== */
+    /* ==== Data (thumbs optional; falls back to profileUrl) ==== */
+    // Adoption Info is first (landing). You can add/remove entries anytime.
     const ANIMALS = [
-      { id:'welcome',        name:'Welcome',        species:'',                 thumb:'thumbs/welcome_thumb.png',       profileUrl:'profiles/welcome_full.png' },
       { id:'adoption_info',  name:'Adoption Info',  species:'Rescue details',   thumb:'thumbs/adoption_info_thumb.jpg',  profileUrl:'profiles/adoption_info.png' },
 
       { id:'aj',             name:'A.J.',           species:'Male • 4 months',  thumb:'thumbs/aj_thumb.jpg',        profileUrl:'profiles/aj.png' },
@@ -215,10 +208,10 @@
       { id:'jean',           name:'Jean Darling',   species:'Female • 4 months',thumb:'thumbs/jean_thumb.jpg',      profileUrl:'profiles/jean.png' },
       { id:'joey',           name:'Joey',           species:'Male • 6 months',  thumb:'thumbs/joey_thumb.jpg',      profileUrl:'profiles/joey.png' },
       { id:'labooboo',       name:'La-Boo-Boo',     species:'Female • 4 months',thumb:'thumbs/labooboo_thumb.jpg',  profileUrl:'profiles/labooboo.png' },
-      { id:'porky',          name:'Porky',          species:'Male • 4 months',  thumb:'thumbs/porky_thumb.jpg',     profileUrl:'profiles/Porky.png' }
+      { id:'porky',          name:'Porky',          species:'Male • 4 months',  thumb:'thumbs/porky_thumb.jpg',     profileUrl:'profiles/porky.png' }
     ];
 
-    /* ==== Adoption status via Firestore ==== */
+    /* ==== Firestore: adoption status ==== */
     let adoptedSet = new Set();
 
     async function loadAdopted(){
@@ -235,9 +228,8 @@
       }
     }
     function visibleAnimals(){
-      return ANIMALS.filter(a =>
-        a.id === 'welcome' || a.id === 'adoption_info' || !adoptedSet.has(a.id)
-      );
+      // Always show the adoption_info poster; hide adopted cats
+      return ANIMALS.filter(a => a.id === 'adoption_info' || !adoptedSet.has(a.id));
     }
 
     /* ==== State & helpers ==== */
@@ -272,23 +264,7 @@
       if (active?.profileUrl){ open.href = active.profileUrl; open.style.pointerEvents='auto'; open.style.opacity='1'; }
       else { open.href = '#'; open.style.pointerEvents='none'; open.style.opacity='.6'; }
 
-      if (!active?.profileUrl){
-        vp.innerHTML = `
-          <div class="welcome">
-            <div class="wel-card">
-              <h2>Welcome to the Kingdom Rescue Foster Portal</h2>
-              <p>Browse the animals below. Tap any profile to view their one-page info sheet. Ask a volunteer if you have questions or want to apply to foster.</p>
-              <div class="wel-grid">
-                <div class="wel-item">1. Scroll the thumbnail rail and tap a pet.</div>
-                <div class="wel-item">2. The profile opens here. Pinch-zoom images or use the <em>Open in new tab</em> button for PDFs.</div>
-                <div class="wel-item">3. Use the thumbnails to navigate, or arrow keys on desktop.</div>
-              </div>
-            </div>
-          </div>`;
-        return;
-      }
-
-      vp.innerHTML = isPdf(active.profileUrl)
+      vp.innerHTML = isPdf(active.profileUrl || '')
         ? `<iframe title="${active.name||'Profile'}" src="${active.profileUrl}" loading="lazy"></iframe>`
         : `<img alt="${active.name||'Profile'}" src="${active.profileUrl}" loading="lazy">`;
     }
@@ -304,7 +280,7 @@
         <div>
           <div class="name">${a.name||'Profile'}</div>
           ${a.species?`<div class="meta">${a.species}</div>`:''}
-          ${a.id==='welcome'?'<div class="badge">Start here</div>':''}
+          ${a.id==='adoption_info'?'<div class="badge">Start here</div>':''}
         </div>`;
       return btn;
     }
@@ -327,8 +303,10 @@
       input.addEventListener('input',()=>{
         const s = input.value.trim().toLowerCase();
         if(!s){list.classList.add('hidden'); list.innerHTML=''; return;}
-        const res = visibleAnimals().filter(a => a.id!=='welcome' && a.id!=='adoption_info'
-          && ((a.name||'').toLowerCase().includes(s) || (a.species||'').toLowerCase().includes(s))).slice(0,8);
+        const res = visibleAnimals().filter(a =>
+          a.id!=='adoption_info' &&
+          ((a.name||'').toLowerCase().includes(s) || (a.species||'').toLowerCase().includes(s))
+        ).slice(0,8);
         list.innerHTML = res.length
           ? res.map(r=>`<button class="search-item" data-id="${r.id}"><strong>${r.name}</strong><small>${r.species||''}</small></button>`).join('')
           : `<div class="search-item" disabled>No matches.</div>`;
@@ -349,7 +327,7 @@
       });
     }
 
-    /* ==== Admin mode (optional UI at ?admin=1) ==== */
+    /* ==== Optional Admin panel (open with ?admin=1) ==== */
     const isAdminMode = new URL(location.href).searchParams.get('admin') === '1';
 
     function mountAdminPanel(){
@@ -396,21 +374,19 @@
       const adminList = document.getElementById('adminList');
 
       function renderAdminList(){
-        const rows = ANIMALS
-          .filter(a => a.id!=='welcome' && a.id!=='adoption_info')
-          .map(a=>{
-            const checked = adoptedSet.has(a.id) ? 'checked' : '';
-            return `<div class="admin-row">
-              <div style="display:flex;align-items:center;gap:8px">
-                <img src="${a.thumb || a.profileUrl}" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
-                <div><div style="font-weight:600">${a.name}</div><small>${a.species||''}</small></div>
-              </div>
-              <label style="display:flex;align-items:center;gap:6px">
-                <small>Adopted</small>
-                <input type="checkbox" data-id="${a.id}" ${checked}/>
-              </label>
-            </div>`;
-          }).join('');
+        const rows = ANIMALS.map(a=>{
+          const checked = adoptedSet.has(a.id) ? 'checked' : '';
+          return `<div class="admin-row">
+            <div style="display:flex;align-items:center;gap:8px">
+              <img src="${a.thumb || a.profileUrl}" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+              <div><div style="font-weight:600">${a.name}</div><small>${a.species||''}</small></div>
+            </div>
+            <label style="display:flex;align-items:center;gap:6px">
+              <small>Adopted</small>
+              <input type="checkbox" data-id="${a.id}" ${checked}/>
+            </label>
+          </div>`;
+        }).join('');
         adminList.innerHTML = rows || '<small>No cats.</small>';
 
         adminList.querySelectorAll('input[type=checkbox]').forEach(cb=>{
@@ -425,7 +401,7 @@
               if(!ids.includes(activeId)) activeId = ids[0];
               render();
             }catch(err){
-              alert('Update failed. Are you signed in as an admin and listed in Firestore /admins?');
+              alert('Update failed. Are you signed in and listed as admin?');
               e.target.checked = !adopted;
             }
           });
@@ -482,9 +458,7 @@
 
       render();
 
-      // Optional admin UI (open with ?admin=1)
-      const isAdminMode = new URL(location.href).searchParams.get('admin') === '1';
-      if (isAdminMode) mountAdminPanel();
+      if (isAdminMode) mountAdminPanel(); // open with ?admin=1
     })();
   </script>
 </body>
