@@ -187,6 +187,18 @@
     @media (max-width: 767px){
       :root{
         --railH:112px; /* was 72px; fits 80px thumb + padding comfortably */
+        /* Mobile: make the bottom thumbnail rail tall enough and keep everything aligned */
+        @media (max-width: 767px){
+          /* Grow the rail so 80px thumbs + padding fit cleanly */
+          .bottomrail{ height:112px; }
+
+          /* Lift the viewport by the same amount so nothing overlaps the rail */
+          .viewport{ bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+
+          /* Keep the arrow buttons and note above the taller rail */
+          .view-actions{ bottom: calc(112px + 8px); }
+          .note{ bottom: calc(112px + 36px); }
+        }
       }
     }
   </style>
