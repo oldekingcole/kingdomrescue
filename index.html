@@ -183,6 +183,12 @@
     .wel-grid{display:grid;grid-template-columns:1fr;gap:10px}
     .wel-item{padding:10px 12px;border-radius:14px;background:#0b0c0f80;border:1px solid var(--border)}
     @media(min-width:640px){.wel-grid{grid-template-columns:repeat(3,1fr)}}
+    /* Mobile: make the bottom rail tall enough to show full thumbnails */
+    @media (max-width: 767px){
+      :root{
+        --railH:112px; /* was 72px; fits 80px thumb + padding comfortably */
+      }
+    }
   </style>
 </head>
 <body>
