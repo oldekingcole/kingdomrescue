@@ -51,7 +51,7 @@
     }
     .brand{display:flex;align-items:center;gap:12px}
 
-    /* 🔁 logo is an <img> */
+    /* logo is an <img> */
     .logo{
       width:40px;height:40px;border-radius:10px;
       object-fit:contain; object-position:center;
@@ -147,7 +147,7 @@
     .viewport iframe,.viewport img{width:100%;height:100%;display:block;position:relative;z-index:10}
     .viewport img{object-fit:contain;background:black}
 
-    /* ✅ When user toggles Fit Width (body.has class .fit-width), images fill width & can scroll */
+    /* Fit Width mode */
     .fit-width .viewport{overflow:auto}
     .fit-width .viewport img{height:auto; width:100%; object-fit:unset}
 
@@ -183,23 +183,20 @@
     .wel-grid{display:grid;grid-template-columns:1fr;gap:10px}
     .wel-item{padding:10px 12px;border-radius:14px;background:#0b0c0f80;border:1px solid var(--border)}
     @media(min-width:640px){.wel-grid{grid-template-columns:repeat(3,1fr)}}
-    /* Mobile: make the bottom rail tall enough to show full thumbnails */
+
+    /* --- Mobile fixes (no nested media rules) --- */
     @media (max-width: 767px){
-      :root{
-        --railH:112px; /* was 72px; fits 80px thumb + padding comfortably */
-        /* Mobile: make the bottom thumbnail rail tall enough and keep everything aligned */
-        @media (max-width: 767px){
-          /* Grow the rail so 80px thumbs + padding fit cleanly */
-          .bottomrail{ height:112px; }
+      /* Use a taller rail so 80px thumbs + padding fit */
+      :root{ --railH:112px; }
 
-          /* Lift the viewport by the same amount so nothing overlaps the rail */
-          .viewport{ bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+      /* Explicit overrides so cascade wins on iOS Safari */
+      .bottomrail{ height: var(--railH); }
+      .viewport{ bottom: calc(var(--railH) + env(safe-area-inset-bottom, 0px)); }
+      .view-actions{ bottom: calc(var(--railH) + 8px + env(safe-area-inset-bottom, 0px)); }
+      .note{ bottom: calc(var(--railH) + 36px + env(safe-area-inset-bottom, 0px)); }
 
-          /* Keep the arrow buttons and note above the taller rail */
-          .view-actions{ bottom: calc(112px + 8px); }
-          .note{ bottom: calc(112px + 36px); }
-        }
-      }
+      /* Keep each horizontal card wide enough to show the name text */
+      .thumbs-horizontal .thumb{ width:auto; min-width:240px; }
     }
   </style>
 </head>
@@ -209,7 +206,6 @@
     <aside class="sidebar" id="sidebar">
       <div class="header">
         <div class="brand">
-          <!-- logo image -->
           <img src="assets/krlogo.jpeg" alt="Kingdom Rescue logo" class="logo" />
           <div>
             <div class="title">Kingdom Rescue</div>
@@ -259,7 +255,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <a id="openExternal" class="openbtn" target="_blank" rel="noreferrer">Open in new tab</a>
-          <!-- 👇 New toggle (mobile only) -->
+          <!-- Fit toggle (mobile only) -->
           <button id="fitToggle" class="fitbtn" aria-pressed="false" title="Toggle between Fit width and Fit screen">Fit width</button>
         </div>
       </div>
