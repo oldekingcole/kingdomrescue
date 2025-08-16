@@ -188,8 +188,11 @@
 
   <script>
   /* ============================================================
-     1) DATA — Update/extend with your profiles & (optional) thumbs
+     Everything runs after the page + deferred SDKs are loaded
      ============================================================ */
+  window.addEventListener('load', () => {
+
+  /* 1) DATA (unchanged) */
   const ANIMALS = [
     { id:'welcome',        name:'Welcome',       species:'',                  thumb:'thumbs/welcome_thumb.png',       profileUrl:'profiles/welcome_full.png' },
     { id:'adoption_info',  name:'Adoption Info', species:'Rescue details',    thumb:'thumbs/adoption_info_thumb.jpg',  profileUrl:'profiles/adoption_info.png' },
@@ -206,37 +209,32 @@
     { id:'porky',     name:'Porky',         species:'Male • 4 months',   thumb:'thumbs/porky_thumb.jpg',     profileUrl:'profiles/Porky.png' }
   ];
 
-  /* ============================================================
-     2) OPTIONAL FIREBASE — Graceful fallback if not configured
-     ============================================================ */
+  /* 2) Firebase init (now guaranteed to run after SDKs have loaded) */
   let fbReady = false, auth = null, db = null;
   try{
     const firebaseConfig = {
-        apiKey: "AIzaSyDKAfB4KVwMS3aXJxrQgqy6GiX0GalzIlw",
-          authDomain: "kingdomrescue-4fa02.firebaseapp.com",
-          projectId: "kingdomrescue-4fa02",
-          storageBucket: "kingdomrescue-4fa02.firebasestorage.app",
-          messagingSenderId: "178736516158",
-          appId: "1:178736516158:web:2f42c123f151044edf556f"
+      apiKey: "AIzaSyDKAfB4KVwMS3aXJxrQgqy6GiX0GalzIlw",
+      authDomain: "kingdomrescue-4fa02.firebaseapp.com",
+      projectId: "kingdomrescue-4fa02",
+      storageBucket: "kingdomrescue-4fa02.appspot.com",  // ← updated
+      messagingSenderId: "178736516158",
+      appId: "1:178736516158:web:2f42c123f151044edf556f"
     };
-    if (Object.keys(firebaseConfig).length){
+    if (window.firebase && Object.keys(firebaseConfig).length){
       firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db   = firebase.firestore();
       fbReady = true;
     }
   }catch(e){
-    fbReady = false; // continue without backend
+    fbReady = false;
   }
 
-  /* ============================================================
-     3) ADOPTED STATE — uses Firestore when present, else shows all
-     ============================================================ */
+  /* 3) Adopted state */
   let adoptedSet = new Set();
-
   async function loadAdopted(){
-    adoptedSet = new Set();                 // default: show all
-    if (!fbReady) return;                   // no backend configured
+    adoptedSet = new Set();
+    if (!fbReady) return;
     try{
       const snap = await db.collection('adoption_status').get();
       snap.forEach(doc=>{
@@ -245,20 +243,16 @@
       });
     }catch(err){
       console.warn('Adoption status load error:', err);
-      adoptedSet = new Set();               // show all on error
+      adoptedSet = new Set();
     }
   }
-
-  function isSystem(id){ return id === 'welcome' || id === 'adoption_info'; }
-
+  const isSystem = id => id==='welcome' || id==='adoption_info';
   function visibleAnimals(){
     const list = ANIMALS.filter(a => isSystem(a.id) || !adoptedSet.has(a.id));
-    return list.length ? list : ANIMALS.slice(); // hard fallback
+    return list.length ? list : ANIMALS.slice();
   }
 
-  /* ============================================================
-     4) UI helpers (baseline you approved)
-     ============================================================ */
+  /* 4) UI helpers */
   const qs = new URL(location.href);
   let activeId = qs.searchParams.get('id') || ANIMALS[0].id;
 
@@ -272,7 +266,6 @@
     render();
     document.querySelectorAll('.thumb').forEach(el=>el.classList.toggle('active', el.dataset.id===id));
   }
-
   const isPdf = url => (url||'').toLowerCase().endsWith('.pdf');
 
   function render(){
@@ -315,7 +308,7 @@
     const btn = document.createElement('button');
     btn.className = 'thumb'; btn.dataset.id = a.id;
     btn.addEventListener('click',()=>setActive(a.id));
-    const thumbSrc = a.thumb || a.profileUrl; // fallback if no thumb yet
+    const thumbSrc = a.thumb || a.profileUrl;
     btn.innerHTML = `
       <img src="${thumbSrc}" alt="${a.name||'Profile'}" loading="lazy">
       <div>
@@ -325,7 +318,6 @@
       </div>`;
     return btn;
   }
-
   function buildThumbs(){
     const v = document.getElementById('thumbsVertical');
     const h = document.getElementById('thumbsHorizontal');
@@ -337,7 +329,7 @@
     });
   }
 
-  // Search (desktop & mobile)
+  /* Search */
   function attachSearch(inputId,listId){
     const input = document.getElementById(inputId);
     const list  = document.getElementById(listId);
@@ -361,7 +353,7 @@
     document.addEventListener('click',(e)=>{ if(!list.contains(e.target) && e.target!==input) list.classList.add('hidden'); });
   }
 
-  // Keyboard
+  /* Keyboard */
   function attachKeys(){
     window.addEventListener('keydown',(e)=>{
       if(['ArrowLeft','ArrowUp','a','w'].includes(e.key)) goPrev();
@@ -369,13 +361,10 @@
     });
   }
 
-  /* ============================================================
-     5) ADMIN PANEL (only if Firebase configured & ?admin=1)
-     ============================================================ */
+  /* Admin panel (only if Firebase configured & ?admin=1) */
   const isAdminMode = new URL(location.href).searchParams.get('admin') === '1';
-
   function mountAdminPanel(){
-    if (!fbReady) return; // no backend configured
+    if (!fbReady) return;
     const wrap = document.createElement('div');
     wrap.innerHTML = `
       <style>
@@ -474,17 +463,15 @@
     renderAdminList();
   }
 
-  /* ============================================================
-     6) BOOT
-     ============================================================ */
+  /* 6) Boot */
   async function boot(){
-    await loadAdopted();                 // safe even if Firebase isn’t configured
+    await loadAdopted();
     buildThumbs();
     attachSearch('search','searchList');
     attachSearch('searchM','searchListM');
     attachKeys();
 
-    // Wire arrows
+    // arrows
     const btnPrev = document.getElementById('btnPrev');
     const btnNext = document.getElementById('btnNext');
     const viewPrev = document.getElementById('viewPrev');
@@ -500,9 +487,12 @@
     if(!ids.includes(activeId)) activeId = ids[0];
     render();
 
-    if (new URL(location.href).searchParams.get('admin') === '1') mountAdminPanel();
+    if (isAdminMode) mountAdminPanel();
   }
+
   boot();
+
+  }); // end window.load
   </script>
 </body>
 </html>
