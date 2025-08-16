@@ -126,7 +126,7 @@
         </div>
       </div>
       <div class="search">
-        <input id="search" placeholder="Search name, species, age…" />
+        <input id="search" placeholder="Search name, sex, age…" />
         <div id="searchList" class="search-list hidden"></div>
       </div>
       <div id="thumbsVertical" class="thumbs-vertical no-scrollbar"></div>
@@ -146,7 +146,7 @@
           </div>
         </div>
         <div class="search">
-          <input id="searchM" placeholder="Search name, species, age…" />
+          <input id="searchM" placeholder="Search name, sex, age…" />
           <div id="searchListM" class="search-list hidden"></div>
         </div>
       </div>
@@ -352,11 +352,15 @@
       btn.className = 'thumb'; btn.dataset.id = a.id;
       btn.addEventListener('click',()=>setActive(a.id));
       const thumbSrc = a.thumb || a.profileUrl;
+
+      // Show meta ONLY for system items (welcome/adoption_info). For cat profiles, show name only.
+      const showMeta = isSystem(a.id) && a.species;
+
       btn.innerHTML = `
         <img src="${thumbSrc}" alt="${a.name||'Profile'}" loading="lazy">
         <div>
           <div class="name">${a.name||'Profile'}</div>
-          ${a.species?`<div class="meta">${a.species}</div>`:''}
+          ${showMeta ? `<div class="meta">${a.species}</div>` : ''}
           ${a.id==='welcome'?'<div class="badge">Start here</div>':''}
         </div>`;
       return btn;
