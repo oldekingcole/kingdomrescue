@@ -123,8 +123,11 @@
     .profile-btn{
       width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
       border:1px solid var(--border);border-radius:10px;background:#0f1012b3;color:var(--text);cursor:pointer;outline:none;
+      transition:background .15s ease, transform .08s ease;
+      touch-action:manipulation;
     }
     .profile-btn:hover{background:#0f1012cc}
+    .profile-btn:active{transform:scale(.97)}
     .profile-btn svg{width:22px;height:22px}
     .fee{
       margin-left:8px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;
@@ -151,12 +154,40 @@
     .fit-width .viewport{overflow:auto}
     .fit-width .viewport img{height:auto; width:100%; object-fit:unset}
 
-    /* Under-viewport arrows + note */
+    /* ===== Big side arrows overlay ===== */
     .view-actions{
-      position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;
-      gap:10px;pointer-events:auto;z-index:20;bottom:8px
+      position:absolute;
+      left:0; right:0;
+      top:64px;                              /* aligns with viewport top on mobile */
+      bottom:calc(var(--railH) + env(safe-area-inset-bottom, 0px)); /* stays above bottom rail */
+      z-index:30;
+      pointer-events:none;                   /* let only buttons be clickable */
     }
-    @media(max-width:767px){.view-actions{bottom:calc(var(--railH) + 8px)}}
+    @media(min-width:768px){
+      .view-actions{ top:68px; bottom:18px; } /* desktop: above note area */
+    }
+    .view-actions .profile-btn{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      pointer-events:auto;
+      width:72px; height:72px;              /* bigger */
+      border-radius:999px;
+      background:#0f1012e0;
+      backdrop-filter:blur(6px);
+      box-shadow:var(--shadow);
+      border:1px solid var(--border);
+    }
+    .view-actions .profile-btn svg{ width:36px; height:36px; }
+    #viewPrev{ left:10px; }
+    #viewNext{ right:10px; }
+    @media(max-width:480px){
+      .view-actions .profile-btn{ width:60px; height:60px; }
+      .view-actions .profile-btn svg{ width:30px; height:30px; }
+      #viewPrev{ left:6px; } #viewNext{ right:6px; }
+    }
+
+    /* Note (kept) */
     .note{
       position:absolute;left:0;right:0;bottom:calc(var(--railH) + 36px);
       text-align:center;color:var(--muted);font-size:12px
@@ -184,16 +215,12 @@
     .wel-item{padding:10px 12px;border-radius:14px;background:#0b0c0f80;border:1px solid var(--border)}
     @media(min-width:640px){.wel-grid{grid-template-columns:repeat(3,1fr)}}
 
-    /* --- Mobile fixes (no nested media rules) --- */
+    /* --- Mobile fixes --- */
     @media (max-width: 767px){
-      /* Use a taller rail so 80px thumbs + padding fit */
-      :root{ --railH:112px; }
+      :root{ --railH:112px; } /* taller rail for full 80px thumbs + padding */
 
-      /* Explicit overrides so cascade wins on iOS Safari */
       .bottomrail{ height: var(--railH); }
       .viewport{ bottom: calc(var(--railH) + env(safe-area-inset-bottom, 0px)); }
-      .view-actions{ bottom: calc(var(--railH) + 8px + env(safe-area-inset-bottom, 0px)); }
-      .note{ bottom: calc(var(--railH) + 36px + env(safe-area-inset-bottom, 0px)); }
 
       /* Keep each horizontal card wide enough to show the name text */
       .thumbs-horizontal .thumb{ width:auto; min-width:240px; }
@@ -263,8 +290,8 @@
       <!-- Viewport -->
       <div class="viewport" id="viewport"></div>
 
-      <!-- Arrows under viewport -->
-      <div class="view-actions">
+      <!-- Big side arrows overlay -->
+      <div class="view-actions" aria-hidden="false">
         <button id="viewPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
