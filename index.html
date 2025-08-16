@@ -16,6 +16,7 @@
       --accent-2:#14b8a6;
       --shadow:0 10px 30px rgba(0,0,0,.45);
       --railH:72px;           /* mobile bottom rail height */
+      --navH:64px;            /* height of the below-image nav strip with arrows */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -55,8 +56,8 @@
     .logo{
       width:40px;height:40px;border-radius:10px;
       object-fit:contain; object-position:center;
-      display:block; background:#0c0c0d; /* subtle pad behind transparent PNGs/JPEGs */
-      padding:2px;                      /* tiny inset so it doesn't touch the edges */
+      display:block; background:#0c0c0d;
+      padding:2px;
     }
 
     .title{font-weight:700;letter-spacing:-.01em}
@@ -97,9 +98,7 @@
       width:64px;height:64px;object-fit:cover;border-radius:12px;flex:0 0 64px;background:#111
     }
     .thumb > div{display:flex;flex-direction:column;justify-content:center;min-width:0}
-    .thumb .name{
-      font-weight:600;font-size:14px;color:var(--text);
-    }
+    .thumb .name{font-weight:600;font-size:14px;color:var(--text)}
     .thumb .meta{color:var(--muted);font-size:12px}
     .badge{font-size:10px;color:#7bfcc7}
     .thumb .name,.thumb .meta,.thumb .badge{
@@ -133,7 +132,7 @@
       margin-left:8px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;
       background:#0b0c0fcc;color:#e5e7eb;font-weight:700;letter-spacing:.2px
     }
-    /* Fit toggle button (mobile only) */
+    /* Fit toggle (mobile only) */
     .fitbtn{border:1px solid var(--border);padding:8px 10px;border-radius:12px;background:transparent;color:var(--text)}
     .fitbtn:hover{background:rgba(255,255,255,.06)}
     @media(min-width:768px){ .fitbtn{display:none} }
@@ -144,55 +143,48 @@
       .fee{padding:5px 8px;font-size:12px}
     }
 
-    .viewport{position:absolute;left:0;right:0;top:64px;bottom:0}
-    @media(min-width:768px){.viewport{top:68px}}
-    @media(max-width:767px){.viewport{bottom:calc(var(--railH) + env(safe-area-inset-bottom,0px))}}
+    /* Viewport now leaves space for the arrow strip below */
+    .viewport{position:absolute;left:0;right:0;top:64px;bottom:var(--navH)}
+    @media(min-width:768px){.viewport{top:68px;bottom:var(--navH)}}
+    @media(max-width:767px){.viewport{bottom:calc(var(--railH) + var(--navH) + env(safe-area-inset-bottom,0px))}}
     .viewport iframe,.viewport img{width:100%;height:100%;display:block;position:relative;z-index:10}
     .viewport img{object-fit:contain;background:black}
 
     /* Fit Width mode */
     .fit-width .viewport{overflow:auto}
-    .fit-width .viewport img{height:auto; width:100%; object-fit:unset}
+    .fit-width .viewport img{height:auto;width:100%;object-fit:unset}
 
-    /* ===== Big side arrows overlay ===== */
+    /* ===== Below-image arrow strip (doesn't cover the image) ===== */
     .view-actions{
-      position:absolute;
-      left:0; right:0;
-      top:64px;                              /* aligns with viewport top on mobile */
-      bottom:calc(var(--railH) + env(safe-area-inset-bottom, 0px)); /* stays above bottom rail */
-      z-index:30;
-      pointer-events:none;                   /* let only buttons be clickable */
+      position:absolute;left:0;right:0;height:var(--navH);
+      bottom:var(--navH); /* default; immediately overridden by media rules below */
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 10px;gap:10px;z-index:25;pointer-events:none;
     }
     @media(min-width:768px){
-      .view-actions{ top:68px; bottom:18px; } /* desktop: above note area */
+      .view-actions{bottom:0} /* desktop: sits at bottom of main; viewport already reserved space */
+    }
+    @media(max-width:767px){
+      .view-actions{bottom:calc(var(--railH) + env(safe-area-inset-bottom,0px))}
     }
     .view-actions .profile-btn{
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
       pointer-events:auto;
-      width:72px; height:72px;              /* bigger */
-      border-radius:999px;
-      background:#0f1012e0;
-      backdrop-filter:blur(6px);
+      width:64px;height:64px;border-radius:999px;
+      background:#0f1012e6;border:1px solid var(--border);
       box-shadow:var(--shadow);
-      border:1px solid var(--border);
     }
-    .view-actions .profile-btn svg{ width:36px; height:36px; }
-    #viewPrev{ left:10px; }
-    #viewNext{ right:10px; }
+    .view-actions .profile-btn svg{width:34px;height:34px}
     @media(max-width:480px){
-      .view-actions .profile-btn{ width:60px; height:60px; }
-      .view-actions .profile-btn svg{ width:30px; height:30px; }
-      #viewPrev{ left:6px; } #viewNext{ right:6px; }
+      .view-actions .profile-btn{width:56px;height:56px}
+      .view-actions .profile-btn svg{width:28px;height:28px}
     }
 
-    /* Note (kept) */
+    /* Note */
     .note{
-      position:absolute;left:0;right:0;bottom:calc(var(--railH) + 36px);
+      position:absolute;left:0;right:0;bottom:calc(var(--railH) + var(--navH) + 8px);
       text-align:center;color:var(--muted);font-size:12px
     }
-    @media(min-width:768px){.note{bottom:18px}}
+    @media(min-width:768px){.note{bottom:calc(var(--navH) + 8px)}}
 
     /* Bottom rail (mobile) */
     .bottomrail{
@@ -215,14 +207,11 @@
     .wel-item{padding:10px 12px;border-radius:14px;background:#0b0c0f80;border:1px solid var(--border)}
     @media(min-width:640px){.wel-grid{grid-template-columns:repeat(3,1fr)}}
 
-    /* --- Mobile fixes --- */
+    /* --- Mobile layout tweaks --- */
     @media (max-width: 767px){
-      :root{ --railH:112px; } /* taller rail for full 80px thumbs + padding */
+      :root{ --railH:112px; } /* taller rail so 80px thumbs fit */
 
       .bottomrail{ height: var(--railH); }
-      .viewport{ bottom: calc(var(--railH) + env(safe-area-inset-bottom, 0px)); }
-
-      /* Keep each horizontal card wide enough to show the name text */
       .thumbs-horizontal .thumb{ width:auto; min-width:240px; }
     }
   </style>
@@ -290,7 +279,7 @@
       <!-- Viewport -->
       <div class="viewport" id="viewport"></div>
 
-      <!-- Big side arrows overlay -->
+      <!-- Below-image arrow strip -->
       <div class="view-actions" aria-hidden="false">
         <button id="viewPrev" class="profile-btn" aria-label="Previous profile" title="Previous (←)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -424,6 +413,7 @@
       const u = new URL(location.href); u.searchParams.set('id', id); history.replaceState({}, '', u);
       render();
       document.querySelectorAll('.thumb').forEach(el=>el.classList.toggle('active', el.dataset.id===id));
+      scrollActiveThumbIntoView();
     }
 
     const isPdf = url => (url||'').toLowerCase().endsWith('.pdf');
@@ -470,7 +460,6 @@
       btn.addEventListener('click',()=>setActive(a.id));
       const thumbSrc = a.thumb || a.profileUrl;
 
-      // Show meta ONLY for system items (welcome/adoption_info). For cat profiles, show name only.
       const showMeta = isSystem(a.id) && a.species;
 
       btn.innerHTML = `
@@ -492,6 +481,16 @@
         if(a.id===activeId){V.classList.add('active');H.classList.add('active');}
         v && v.appendChild(V); h && h.appendChild(H);
       });
+      scrollActiveThumbIntoView();
+    }
+
+    /* Auto-scroll the active thumbnail into view (both lists) */
+    function scrollActiveThumbIntoView(){
+      const id = activeId;
+      const v = document.querySelector(`#thumbsVertical .thumb[data-id="${id}"]`);
+      const h = document.querySelector(`#thumbsHorizontal .thumb[data-id="${id}"]`);
+      if (v){ v.scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'}); }
+      if (h){ h.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'}); }
     }
 
     // Search
@@ -547,8 +546,8 @@
           .admin-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border)}
           .admin-list{max-height:40vh;overflow:auto}
           .admin-login{display:grid;grid-template-columns:1fr auto;gap:6px;margin:8px 0}
-          .admin-login input{min-width:0;width:100%;padding:8px;border-radius:10px;border:1px solid var(--border);background:#121316c0;color:var(--text)}
-          .admin-btn{border:1px solid var(--border);background:#0f1012b3;color:var(--text);border-radius:10px;padding:8px 10px;cursor:pointer}
+          .admin-login input{min-width:0;width:100%;padding:8px;border-radius:10px;border:1px solid var(--border);background:#121316c0;color:#e5e7eb}
+          .admin-btn{border:1px solid var(--border);background:#0f1012b3;color:#e5e7eb;border-radius:10px;padding:8px 10px;cursor:pointer}
           .admin-badge{font-size:11px;padding:2px 6px;border:1px solid var(--border);border-radius:999px;color:#e5e7eb}
           .hidden{display:none}
           @media (max-width:480px){ .admin-login{grid-template-columns:1fr}.admin-btn{width:100%} }
@@ -572,7 +571,6 @@
       `;
       document.body.appendChild(wrap);
 
-      // UX tweaks
       const emailEl = document.getElementById('adminEmail');
       const passEl  = document.getElementById('adminPass');
       if (emailEl){ emailEl.setAttribute('inputmode','email'); emailEl.style.textOverflow='ellipsis'; }
@@ -608,7 +606,6 @@
             const adopted = e.target.checked;
             try{
               await db.collection('adoption_status').doc(id).set({ adopted }, { merge:true });
-              // realtime listener will update UI; keep local in sync for snappy feel
               if (adopted) adoptedSet.add(id); else adoptedSet.delete(id);
               buildThumbs(); const ids = order(); if(!ids.includes(activeId)) activeId = ids[0]; render();
             }catch(err){
@@ -619,7 +616,6 @@
         });
       }
 
-      // Buttons
       document.getElementById('refreshAdopted').addEventListener('click', async ()=>{
         await loadAdoptedOnce(); renderAdminList(); buildThumbs(); render();
       });
@@ -630,7 +626,6 @@
       });
       document.getElementById('adminSignOut').addEventListener('click', async ()=>{ await auth.signOut(); });
 
-      // Auth state
       auth.onAuthStateChanged(user=>{
         const authed = !!user;
         adminStatus.textContent = authed ? 'Signed in' : 'Signed out';
@@ -640,9 +635,7 @@
         renderAdminList();
       });
 
-      // Live reflect changes in panel too
       window.addEventListener('adopted-updated', renderAdminList);
-
       renderAdminList();
     }
 
@@ -661,7 +654,7 @@
     function toggleFit(){ fitWidth = !fitWidth; applyFit(); }
 
     async function boot(){
-      await loadAdoptedOnce();   // safe even if Firebase isn't configured
+      await loadAdoptedOnce();
       buildThumbs();
       attachSearch('search','searchList');
       attachSearch('searchM','searchListM');
@@ -690,7 +683,7 @@
 
       // Admin panel & realtime
       if (new URL(location.href).searchParams.get('admin') === '1') mountAdminPanel();
-      startRealtime(); // always start realtime (no-op if no Firebase)
+      startRealtime();
     }
     boot();
 
